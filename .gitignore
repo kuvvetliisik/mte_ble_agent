@@ -1,0 +1,30 @@
+# Derleme Dosyaları
+build/
+CMakeFiles/
+CMakeCache.txt
+Makefile
+*.o
+*.so
+*.a
+*.out
+
+# Qt ve CMake Geçici Dosyaları
+moc_*
+ui_*
+qrc_*
+*.pro.user
+*.qmlc
+*.qrc
+*.qmake.stash
+*.obj
+
+# Kendi Kullanıcı Konfigürasyonları
+.vscode/
+.idea/
+*.swp
+*~
+
+# Git için gereksiz dosyalar
+*.log
+*.lock
+*.bak
