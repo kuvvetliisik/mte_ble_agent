@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>990</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QMainWindow {
+    background-color: #2b2b2b; /* Koyu gri arka plan */
+    color: #ffffff; /* Tüm metinleri beyaz yap */
+    border-radius: 10px; /* Köşeleri yuvarlak yap */
+}
+</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout" columnstretch="1,5">
+    <item row="0" column="0">
+     <widget class="QListWidget" name="listWidget">
+      <property name="styleSheet">
+       <string notr="true">QListWidget {
+    background-color: #2E3440;  /* Koyu Gri */
+    color: #D8DEE9;             /* Açık Beyaz */
+    border: none;
+    font-size: 14px;
+    padding: 5px;
+}
+
+QListWidget::item {
+    padding: 8px;
+    border-radius: 5px;
+}
+
+QListWidget::item:selected {
+    background-color: #88C0D0;  /* Mavi Seçim */
+    color: black;
+    font-weight: bold;
+}
+QLabel {
+    font-size: 14px;
+    font-weight: bold;
+    color: #00ffcc;
+}
+
+QTextEdit {
+    background-color: #1e1e1e;
+    color: #00ff00;
+    font-family: &quot;Consolas&quot;;
+    font-size: 12px;
+    border: 1px solid #3c4450;
+}
+</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>Bağlantı Ekranı</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Cihaz Bilgisi</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QStackedWidget" name="stackedWidget">
+      <property name="styleSheet">
+       <string notr="true">QStackedWidget {
+    background-color: #262b33; /* Koyu gri arkaplan */
+    border-radius: 10px; /* Köşeleri yuvarlak yap */
+    padding: 10px; /* İç boşluk */
+}
+
+QWidget#page_baglanti {
+    background-color: #1e1e1e; /* Siyah arkaplan */
+    color: #ffffff; /* Beyaz yazı rengi */
+    border: 2px solid #3c4450; /* Çerçeve ekle */
+    border-radius: 10px;
+}
+
+QWidget#page_cihaz {
+    background-color: #222831; /* Koyu mavi-gri arkaplan */
+    color: #ffffff; /* Beyaz yazılar */
+    border: 2px solid #3c4450;
+    border-radius: 10px;
+}
+
+</string>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="page_Baglanti">
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="0">
+         <widget class="QPushButton" name="btnScan">
+          <property name="styleSheet">
+           <string notr="true">QPushButton {
+    background-color: #5E81AC; /* Mavi Ton */
+    color: white;
+    border-radius: 5px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+QPushButton:hover {
+    background-color: #81A1C1; /* Açık Mavi */
+}
+
+QPushButton:pressed {
+    background-color: #4C566A; /* Koyu Gri */
+}
+</string>
+          </property>
+          <property name="text">
+           <string>Cihazları Tara</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="comboBluetoothDevices">
+          <property name="styleSheet">
+           <string notr="true">QComboBox {
+    background-color: #3B4252;
+    color: #ECEFF4;
+    border-radius: 5px;
+    padding: 5px;
+    font-size: 14px;
+}
+
+QComboBox::drop-down {
+    background-color: #5E81AC;
+    border-radius: 5px;
+    width: 20px;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #434C5E;
+    selection-background-color: #81A1C1;
+    selection-color: black;
+}
+</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>Bluetooth Cihazı Seç</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QPushButton" name="btnConnect">
+          <property name="styleSheet">
+           <string notr="true">QPushButton {
+    background-color: #5E81AC; /* Mavi Ton */
+    color: white;
+    border-radius: 5px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+QPushButton:hover {
+    background-color: #81A1C1; /* Açık Mavi */
+}
+
+QPushButton:pressed {
+    background-color: #4C566A; /* Koyu Gri */
+}
+</string>
+          </property>
+          <property name="text">
+           <string>Bağlan</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QPushButton" name="btnDisconnect">
+          <property name="styleSheet">
+           <string notr="true">QPushButton {
+    background-color: #5E81AC; /* Mavi Ton */
+    color: white;
+    border-radius: 5px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+QPushButton:hover {
+    background-color: #81A1C1; /* Açık Mavi */
+}
+
+QPushButton:pressed {
+    background-color: #4C566A; /* Koyu Gri */
+}
+</string>
+          </property>
+          <property name="text">
+           <string>Bağlantıyı Kes</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="3">
+         <widget class="QPushButton" name="ClearLogButton">
+          <property name="styleSheet">
+           <string notr="true">QPushButton {
+    background-color: #5E81AC; /* Mavi Ton */
+    color: white;
+    border-radius: 5px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+QPushButton:hover {
+    background-color: #81A1C1; /* Açık Mavi */
+}
+
+QPushButton:pressed {
+    background-color: #4C566A; /* Koyu Gri */
+}
+</string>
+          </property>
+          <property name="text">
+           <string>Temizle</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="4">
+         <widget class="QTextEdit" name="txtLog">
+          <property name="styleSheet">
+           <string notr="true">QTextEdit {
+    background-color: #2E3440; /* Koyu Gri */
+    color: #A3BE8C; /* Yeşil */
+    border-radius: 5px;
+    padding: 5px;
+}
+</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" colspan="2">
+         <widget class="QLabel" name="lblConnectionStatus">
+          <property name="styleSheet">
+           <string notr="true">QLabel {
+    color: #ECEFF4; /* Açık Beyaz */
+    font-size: 14px;
+    font-weight: bold;
+}
+QLabel#lblConnectionStatus {
+    font-size: 16px;
+    font-weight: bold;
+    color: #BF616A; /* Bağlantı yokken kırmızı */
+    border-radius: 5px;
+    padding: 5px;
+}
+
+QLabel#lblConnectionStatus:enabled {
+    color: #A3BE8C; /* Bağlantı varken yeşil */
+}</string>
+          </property>
+          <property name="text">
+           <string>Bağlantı Durumu</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_cihaz"/>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>990</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
