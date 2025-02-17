@@ -32,18 +32,15 @@ MainWindow::MainWindow(QWidget *parent)
             ui->comboBluetoothDevices->addItem(deviceStr);
             cihazlar[deviceStr] = cihazAdresi;
         }
-
-        qDebug() << "Bulunan cihaz: " << cihazAdi << " - " << cihazAdresi;
     });
-
 
     connect(ui->btnScan, &QPushButton::clicked, this, &MainWindow::updateBluetoothDevices);
     connect(ui->btnConnect, &QPushButton::clicked, this, &MainWindow::connectToDevice);
     connect(ui->btnDisconnect, &QPushButton::clicked, this, &MainWindow::disconnectDevice);
     connect(ui->ClearLogButton, &QPushButton::clicked, this, &MainWindow::clearLog);
+    connect(ui->btnRefresh, &QPushButton::clicked, this, &MainWindow::refreshConnection);
+    connect(ui->btnForgetDevice, &QPushButton::clicked, this, &MainWindow::forgetDevice);
 }
-
-
 
 MainWindow::~MainWindow() {
     delete ui;
@@ -74,6 +71,8 @@ void MainWindow::updateBluetoothDevices() {
     connect(discoveryAgent, &QBluetoothDeviceDiscoveryAgent::deviceDiscovered, this, [this](const QBluetoothDeviceInfo &device) {
         QString cihazAdi = device.name().trimmed();
         QString macAdresi = device.address().toString().trimmed();
+        int signalStrength = device.rssi();
+        QString cihazBilgisi = QString("%1 [%2] RSSI: %3 dBm").arg(cihazAdi, macAdresi).arg(signalStrength);
 
         if (cihazAdi.isEmpty()) {
             if (cihazlar.contains(macAdresi)) {
@@ -89,6 +88,10 @@ void MainWindow::updateBluetoothDevices() {
             ui->comboBluetoothDevices->addItem(cihazGosterim);
             cihazlar[macAdresi] = cihazGosterim;
         }
+
+        ui->lblDeviceName->setText("Cihaz Adı: " + cihazAdi);
+        ui->lblMacAddress->setText("MAC: " + macAdresi);
+        ui->lblSignalStrength->setText("Sinyal Gücü: " + QString::number(signalStrength) + " dBm");
     });
 
     connect(discoveryAgent, &QBluetoothDeviceDiscoveryAgent::finished, this, [this]() {
@@ -102,8 +105,6 @@ void MainWindow::connectToDevice() {
 
     if (socket && socket->isOpen()) {
         ui->txtLog->append("⚠️ Cihaz zaten bağlı: " + secilenCihaz);
-        ui->lblConnectionStatus->setText("✅ Zaten Bağlı: " + secilenCihaz);
-        ui->lblConnectionStatus->setStyleSheet("color: green; font-weight: bold; font-size: 18px;");
         return;
     }
 
@@ -119,7 +120,6 @@ void MainWindow::connectToDevice() {
     if (socket) {
         if (socket->isOpen()) {
             socket->disconnectFromService();
-
             QEventLoop loop;
             connect(socket, &QBluetoothSocket::disconnected, &loop, &QEventLoop::quit);
             QTimer::singleShot(3000, &loop, &QEventLoop::quit);
@@ -134,45 +134,50 @@ void MainWindow::connectToDevice() {
     ui->lblConnectionStatus->setStyleSheet("color: orange; font-weight: bold; font-size: 18px;");
     ui->txtLog->append("Cihaza bağlanılıyor: " + secilenCihaz);
 
+    socket->connectToService(bluetoothAdresi, serviceUuid);
+
     connect(socket, &QBluetoothSocket::connected, this, [=]() {
         ui->lblConnectionStatus->setText("✅ Bağlandı: " + secilenCihaz);
-        ui->lblConnectionStatus->setStyleSheet("color: green; font-weight: bold; font-size: 18px; ");
+        ui->lblConnectionStatus->setStyleSheet("color: green; font-weight: bold; font-size: 18px;");
         ui->txtLog->append("Cihaza başarıyla bağlanıldı: " + secilenCihaz);
 
-    });
-
-    QTimer::singleShot(5000, this, [=]() {
-        if (socket && socket->isOpen()) {
-            ui->lblConnectionStatus->setText("✅ Bağlandı: " + secilenCihaz);
-            ui->lblConnectionStatus->setStyleSheet("color: green; font-weight: bold; font-size: 18px;");
-            ui->txtLog->append("Cihaza başarıyla bağlanıldı: " + secilenCihaz);
-        }
-    });
-
-    connect(socket, &QBluetoothSocket::disconnected, this, [=]() {
-        ui->lblConnectionStatus->setText("❌ Bağlantı Kesildi");
-        ui->lblConnectionStatus->setStyleSheet("color: red; font-weight: bold; font-size: 18px;");
-        ui->txtLog->append("Cihaz bağlantısı kesildi.");
+        QString cihazBilgisi = cihazlar[secilenCihaz];
+        ui->lblDeviceName->setText("Cihaz Adı: " + secilenCihaz);
+        ui->lblMacAddress->setText("MAC: " + cihazAdresi);
+        ui->lblSignalStrength->setText("Sinyal Gücü: Bilinmiyor");
+        ui->textEditLogs->append("Bağlanan cihaz bilgisi: " + cihazBilgisi);
     });
 
     connect(socket, &QBluetoothSocket::errorOccurred, this, [=](QBluetoothSocket::SocketError error) {
-        ui->lblConnectionStatus->setText("⚠️ Bağlantı Başarısız");
+        ui->lblConnectionStatus->setText("⚠️ Bağlantı Hatası!");
         ui->lblConnectionStatus->setStyleSheet("color: red; font-weight: bold; font-size: 18px;");
         ui->txtLog->append("Bağlantı hatası: " + socket->errorString());
     });
 
-    socket->connectToService(bluetoothAdresi, serviceUuid);
+    QTimer::singleShot(10000, this, [=]() {
+        if (!socket->isOpen()) {
+            ui->lblConnectionStatus->setText("❌ Bağlantı Zaman Aşımı!");
+            ui->lblConnectionStatus->setStyleSheet("color: red; font-weight: bold; font-size: 18px;");
+            ui->txtLog->append("Bağlantı zaman aşımına uğradı. Cihaz bağlantıyı kabul etmedi veya ulaşılabilir değil.");
+        }
+    });
 }
-
 
 void MainWindow::disconnectDevice() {
     if (!socket || !socket->isOpen()) {
         ui->txtLog->append("⚠️ Bağlantı zaten kapalı.");
+        ui->lblConnectionStatus->setText("🔴 Bağlı Değil");
+        ui->lblConnectionStatus->setStyleSheet("color: red; font-weight: bold; font-size: 18px;");
         return;
     }
 
     ui->lblConnectionStatus->setText("⏳ Bağlantı Kesiliyor...");
     ui->txtLog->append("Bağlantı kesiliyor...");
+
+    ui->lblDeviceName->setText("Cihaz Adı: -");
+    ui->lblMacAddress->setText("MAC: -");
+    ui->lblSignalStrength->setText("Sinyal Gücü: -");
+    ui->textEditLogs->clear();
 
     if (socket->isOpen()) {
         socket->disconnectFromService();
@@ -204,8 +209,6 @@ void MainWindow::clearLog() {
     ui->txtLog->clear();
 }
 
-
-
 void MainWindow::on_listWidget_itemClicked(QListWidgetItem *item)
 {
     if (item->text() == "Bağlantı Ekranı") {
@@ -215,3 +218,50 @@ void MainWindow::on_listWidget_itemClicked(QListWidgetItem *item)
     }
 }
 
+void MainWindow::refreshConnection() {
+    if (!socket || !socket->isOpen()) {
+        ui->txtLog->append("⚠️ Bağlı bir cihaz yok, bağlantıyı yenileyemem!");
+        return;
+    }
+
+    QString secilenCihaz = ui->comboBluetoothDevices->currentText();
+    ui->txtLog->append("🔄 Bağlantı Yenileniyor: " + secilenCihaz);
+
+    socket->disconnectFromService();
+    socket->abort();
+
+    QEventLoop loop;
+    connect(socket, &QBluetoothSocket::disconnected, &loop, &QEventLoop::quit);
+    QTimer::singleShot(3000, &loop, &QEventLoop::quit);
+    loop.exec();
+
+    connectToDevice();
+}
+
+void MainWindow::forgetDevice() {
+    QString secilenCihaz = ui->comboBluetoothDevices->currentText();
+
+    if (secilenCihaz.isEmpty()) {
+        ui->txtLog->append("⚠️ Unutulacak bir cihaz seçilmedi!");
+        return;
+    }
+
+    ui->txtLog->append("🗑️ Cihaz Unutuluyor: " + secilenCihaz);
+
+    if (cihazlar.contains(secilenCihaz)) {
+        cihazlar.remove(secilenCihaz);
+    }
+
+    int index = ui->comboBluetoothDevices->findText(secilenCihaz);
+    if (index != -1) {
+        ui->comboBluetoothDevices->removeItem(index);
+    }
+
+    ui->lblDeviceName->setText("Cihaz Adı: -");
+    ui->lblMacAddress->setText("MAC: -");
+    ui->lblConnectionStatus_2->setText("Bağlantı Durumu: Bağlı Değil");
+    ui->lblBluetoothVersion->setText("Bluetooth Versiyonu: -");
+    ui->lblSignalStrength->setText("Sinyal Gücü: -");
+
+    ui->textEditLogs->append("✅ Cihaz unutuldu!");
+}

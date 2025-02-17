@@ -15,10 +15,10 @@
 #include <QPainter>
 #include <QListWidgetItem>
 
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
-
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -35,8 +35,9 @@ private slots:
     void discoverServices(const QBluetoothAddress &address);
     //void saveKnownDevice(const QString &cihazAdi, const QString &macAdresi);
     void clearLog();
-
     void on_listWidget_itemClicked(QListWidgetItem *item);
+    void refreshConnection();
+    void forgetDevice();
 
 private:
     Ui::MainWindow *ui;

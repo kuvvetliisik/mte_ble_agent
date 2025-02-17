@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>990</width>
+    <width>1103</width>
     <height>600</height>
    </rect>
   </property>
@@ -22,7 +22,7 @@
 </string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout" columnstretch="1,5">
+   <layout class="QGridLayout" name="gridLayout" columnstretch="1,6">
     <item row="0" column="0">
      <widget class="QListWidget" name="listWidget">
       <property name="styleSheet">
@@ -97,7 +97,7 @@ QWidget#page_cihaz {
 </string>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="page_Baglanti">
        <layout class="QGridLayout" name="gridLayout_2">
@@ -272,7 +272,180 @@ QLabel#lblConnectionStatus:enabled {
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="page_cihaz"/>
+      <widget class="QWidget" name="page_cihaz">
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="7" column="0">
+         <widget class="QLabel" name="lblBluetoothVersion">
+          <property name="styleSheet">
+           <string notr="true">QLabel {
+    font-size: 14px;
+    font-weight: bold;
+    color: #66BB6A
+}
+</string>
+          </property>
+          <property name="text">
+           <string>Bluetooth Seviyesi :</string>
+          </property>
+         </widget>
+        </item>
+        <item row="16" column="3">
+         <widget class="QPushButton" name="pushButton_3">
+          <property name="styleSheet">
+           <string notr="true">QPushButton {
+    background-color: #5E81AC; /* Mavi Ton */
+    color: white;
+    border-radius: 5px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+QPushButton:hover {
+    background-color: #81A1C1; /* Açık Mavi */
+}
+
+QPushButton:pressed {
+    background-color: #4C566A; /* Koyu Gri */
+}
+</string>
+          </property>
+          <property name="text">
+           <string>Test Gönder</string>
+          </property>
+         </widget>
+        </item>
+        <item row="15" column="0" colspan="4">
+         <widget class="QTextEdit" name="textEditLogs">
+          <property name="styleSheet">
+           <string notr="true">QTextEdit {
+    background-color: #2E3440; /* Koyu Gri */
+    color: #A3BE8C; /* Yeşil */
+    border-radius: 5px;
+    padding: 5px;
+}
+</string>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="16" column="1">
+         <widget class="QPushButton" name="btnRefresh">
+          <property name="styleSheet">
+           <string notr="true">QPushButton {
+    background-color: #5E81AC; /* Mavi Ton */
+    color: white;
+    border-radius: 5px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+QPushButton:hover {
+    background-color: #81A1C1; /* Açık Mavi */
+}
+
+QPushButton:pressed {
+    background-color: #4C566A; /* Koyu Gri */
+}
+</string>
+          </property>
+          <property name="text">
+           <string>Bağlantıyı Yenile</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="0">
+         <widget class="QLabel" name="lblSignalStrength">
+          <property name="styleSheet">
+           <string notr="true">QLabel {
+    font-size: 14px;
+    font-weight: bold;
+    color: #66BB6A;
+
+}
+</string>
+          </property>
+          <property name="text">
+           <string>Sinyal Gücü Seviyesi(RSSI) : </string>
+          </property>
+         </widget>
+        </item>
+        <item row="16" column="2">
+         <widget class="QPushButton" name="btnForgetDevice">
+          <property name="styleSheet">
+           <string notr="true">QPushButton {
+    background-color: #5E81AC; /* Mavi Ton */
+    color: white;
+    border-radius: 5px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+QPushButton:hover {
+    background-color: #81A1C1; /* Açık Mavi */
+}
+
+QPushButton:pressed {
+    background-color: #4C566A; /* Koyu Gri */
+}
+</string>
+          </property>
+          <property name="text">
+           <string>Cihazı Unut</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0" rowspan="15" colspan="4">
+         <layout class="QGridLayout" name="gridLayout_3"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="lblDeviceName">
+          <property name="styleSheet">
+           <string notr="true">QLabel {
+    font-size: 14px;
+    font-weight: bold;
+    color: #66BB6A;
+}
+</string>
+          </property>
+          <property name="text">
+           <string>Cihaz Adı :</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <widget class="QLabel" name="lblConnectionStatus_2">
+          <property name="styleSheet">
+           <string notr="true">QLabel {
+    font-size: 14px;
+    font-weight: bold;
+    color: #66BB6A;
+}
+</string>
+          </property>
+          <property name="text">
+           <string>Bağlantı Durumu :</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="lblMacAddress">
+          <property name="styleSheet">
+           <string notr="true">QLabel {
+    font-size: 14px;
+    font-weight: bold;
+    color: #66BB6A;
+}
+</string>
+          </property>
+          <property name="text">
+           <string>Mac Adresi :</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -282,7 +455,7 @@ QLabel#lblConnectionStatus:enabled {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>990</width>
+     <width>1103</width>
      <height>22</height>
     </rect>
    </property>
