@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DeviceInfo</class>
+ <widget class="QWidget" name="DeviceInfo">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>958</width>
+    <height>610</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget {
+    background-color: #2E3440;  /* Koyu Gri */
+    color: #D8DEE9;             /* Açık Beyaz */
+    border: none;
+    font-size: 14px;
+    padding: 5px;
+}
+
+QWidget::item {
+    padding: 8px;
+    border-radius: 5px;
+}
+
+QWidget::item:selected {
+    background-color: #88C0D0;  /* Mavi Seçim */
+    color: black;
+    font-weight: bold;
+}</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="1" column="2">
+    <widget class="QPushButton" name="pushButton_3">
+     <property name="styleSheet">
+      <string notr="true">QPushButton {
+    background-color: #5E81AC; /* Mavi Ton */
+    color: white;
+    border-radius: 5px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+QPushButton:hover {
+    background-color: #81A1C1; /* Açık Mavi */
+}
+
+QPushButton:pressed {
+    background-color: #4C566A; /* Koyu Gri */
+}
+</string>
+     </property>
+     <property name="text">
+      <string>Send Test</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QPushButton" name="btnForgetDevice">
+     <property name="styleSheet">
+      <string notr="true">QPushButton {
+    background-color: #5E81AC; /* Mavi Ton */
+    color: white;
+    border-radius: 5px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+QPushButton:hover {
+    background-color: #81A1C1; /* Açık Mavi */
+}
+
+QPushButton:pressed {
+    background-color: #4C566A; /* Koyu Gri */
+}
+</string>
+     </property>
+     <property name="text">
+      <string>Forget The Device</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QPushButton" name="btnRefresh">
+     <property name="styleSheet">
+      <string notr="true">QPushButton {
+    background-color: #5E81AC; /* Mavi Ton */
+    color: white;
+    border-radius: 5px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+QPushButton:hover {
+    background-color: #81A1C1; /* Açık Mavi */
+}
+
+QPushButton:pressed {
+    background-color: #4C566A; /* Koyu Gri */
+}
+</string>
+     </property>
+     <property name="text">
+      <string>Refresh Connection</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="3">
+    <widget class="QStackedWidget" name="stackedWidget">
+     <property name="styleSheet">
+      <string notr="true">QStackedWidget {
+    background-color: #262b33; /* Koyu gri arkaplan */
+    border-radius: 10px; /* Köşeleri yuvarlak yap */
+    padding: 10px; /* İç boşluk */
+}
+
+QWidget#page_baglanti {
+    background-color: #1e1e1e; /* Siyah arkaplan */
+    color: #ffffff; /* Beyaz yazı rengi */
+    border: 2px solid #3c4450; /* Çerçeve ekle */
+    border-radius: 10px;
+}
+
+QWidget#page_cihaz {
+    background-color: #222831; /* Koyu mavi-gri arkaplan */
+    color: #ffffff; /* Beyaz yazılar */
+    border: 2px solid #3c4450;
+    border-radius: 10px;
+}
+
+</string>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="page_3">
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <widget class="QLabel" name="lblDeviceName">
+         <property name="styleSheet">
+          <string notr="true">QLabel {
+    font-size: 14px;
+    font-weight: bold;
+    color: #66BB6A;
+}
+</string>
+         </property>
+         <property name="text">
+          <string>Device Name :</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="lblMacAddress">
+         <property name="styleSheet">
+          <string notr="true">QLabel {
+    font-size: 14px;
+    font-weight: bold;
+    color: #66BB6A;
+}
+</string>
+         </property>
+         <property name="text">
+          <string>Mac Address :</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="lblConnectionStatus_2">
+         <property name="styleSheet">
+          <string notr="true">QLabel {
+    font-size: 14px;
+    font-weight: bold;
+    color: #66BB6A;
+}
+</string>
+         </property>
+         <property name="text">
+          <string>Connection Status :</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="lblBluetoothVersion">
+         <property name="styleSheet">
+          <string notr="true">QLabel {
+    font-size: 14px;
+    font-weight: bold;
+    color: #66BB6A;
+}
+</string>
+         </property>
+         <property name="text">
+          <string>Bluetooth Level :</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="lblSignalStrength">
+         <property name="styleSheet">
+          <string notr="true">QLabel {
+    font-size: 14px;
+    font-weight: bold;
+    color: #66BB6A;
+}
+</string>
+         </property>
+         <property name="text">
+          <string>Signal Strength Level(RSSI) :</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QTextEdit" name="textEditLogs">
+         <property name="styleSheet">
+          <string notr="true">QTextEdit {
+    background-color: #2E3440; /* Koyu Gri */
+    color: #A3BE8C; /* Yeşil */
+    border-radius: 5px;
+    padding: 5px;
+}
+</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="page_4"/>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
