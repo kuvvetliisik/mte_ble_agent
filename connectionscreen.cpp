@@ -70,7 +70,10 @@ void ConnectionScreen::connectToDevice() {
 
     QString macAddress = devicess[selectedDevice];
     QBluetoothAddress bluetoothAddress(macAddress);
-    QBluetoothUuid serviceUuid("0000110a-0000-1000-8000-00805f9b34fb");
+   // QBluetoothUuid serviceUuid("00001108-0000-1000-8000-00805f9b34fb");
+    QBluetoothUuid serviceUuid("0000110d-0000-1000-8000-00805f9b34fb"); // A2DP UUID
+
+    //QBluetoothUuid serviceUuid("0000110a-0000-1000-8000-00805f9b34fb");
 
     if (socket) {
         // if (socket->isOpen()) {
@@ -85,8 +88,12 @@ void ConnectionScreen::connectToDevice() {
     ui->lblConnection->setText("⏳ Connecting...");
     ui->txtLog->append("Connecting to device: " + selectedDevice);
 
-    qDebug() << "🔹 Trying to connect to: " << selectedDevice;
-    qDebug() << "🔹 MAC Address: " << macAddress;
+
+    qDebug() << "🔹 [TEST] Trying to connect to Bluetooth device...";
+    qDebug() << "   Selected Device: " << selectedDevice;
+    qDebug() << "   MAC Address: " << macAddress;
+    qDebug() << "   UUID: " << serviceUuid.toString();
+
 
     connect(socket, &QBluetoothSocket::connected, this, [=]() {
         ui->lblConnection->setText("✅ Connected: " + selectedDevice);
@@ -103,21 +110,21 @@ void ConnectionScreen::connectToDevice() {
         qDebug() << "MAC Address: " << macAddress;
         qDebug() << "RSSI (Initial): " << rssi << " dBm";
         qDebug() << "Bluetooth Level: " << bluetoothVersion;
-
-        //emit deviceConnected(selectedDevice, macAddress, rssi, bluetoothVersion);
+        emit deviceConnected(selectedDevice, macAddress, rssi, bluetoothVersion);
 
         QTimer::singleShot(2000, this, [=]() {
             if (rssiValues.contains(macAddress)) {
                 int updatedRssi = rssiValues[macAddress];
                 qDebug() << "🔹 Updated RSSI after connection: " << updatedRssi << " dBm";
-                emit deviceConnected(selectedDevice, macAddress, updatedRssi, bluetoothVersion);
+                //emit deviceConnected(selectedDevice, macAddress, updatedRssi, bluetoothVersion);
             }
         });
     });
 
     connect(socket, &QBluetoothSocket::errorOccurred, this, [=](QBluetoothSocket::SocketError error) {
         ui->lblConnection->setText("⚠️ Connection error!");
-        ui->txtLog->append("Connection error: " + socket->errorString());
+        qDebug() << "⚠️ Error Code: " << error;
+        //ui->txtLog->append("Connection error: " + socket->errorString());
         qDebug() << "⚠️ Connection Error: " << socket->errorString();
     });
 
@@ -142,7 +149,6 @@ void ConnectionScreen::disconnectDevice() {
         socket->close();
         qDebug() << "Bluetooth connection closed.";
     }
-
 
     if (devicess.contains(ui->comboBox->currentText())) {
         QString macAddress = devicess[ui->comboBox->currentText()];

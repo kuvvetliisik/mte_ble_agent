@@ -12,9 +12,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->stackedWidget->addWidget(connectionScreen);
     ui->stackedWidget->addWidget(deviceInfo);
 
+    connect(connectionScreen, &ConnectionScreen::deviceConnected, this, &MainWindow::handleDeviceConnected);
     connect(ui->btnConnectionScreen, &QPushButton::clicked, this, &MainWindow::showConnectionScreen);
     connect(ui->btnDeviceInfo, &QPushButton::clicked, this, &MainWindow::showDeviceInfo);
-    connect(connectionScreen, &ConnectionScreen::deviceConnected, this, &MainWindow::handleDeviceConnected);
+
 }
 
 MainWindow::~MainWindow() {
@@ -36,6 +37,13 @@ void MainWindow::handleDeviceConnected(QString deviceName, QString macAddress, i
     qDebug() << "RSSI: " << rssi;
     qDebug() << "Bluetooth Level: " << bluetoothversion;
     deviceInfo->updateDeviceInfo(deviceName, macAddress, rssi, bluetoothversion);
+
+    deviceInfo->ui->lblDeviceName->setText(deviceName);
+    deviceInfo->ui->lblMacAddress->setText(macAddress);
+    deviceInfo->ui->lblSignalStrength->setText(QString::number(rssi) + " dBm");
+    deviceInfo->ui->lblBluetoothVersion->setText(bluetoothversion);
+
+    showDeviceInfo();
 
 }
 

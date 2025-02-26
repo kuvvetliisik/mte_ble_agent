@@ -5,6 +5,7 @@
 #include <QBluetoothDeviceDiscoveryAgent>
 #include <QBluetoothSocket>
 #include <QBluetoothServiceDiscoveryAgent>
+#include <QBluetoothServiceInfo>
 #include <QMap>
 
 QT_BEGIN_NAMESPACE
@@ -31,6 +32,7 @@ private slots:
 private:
     Ui::ConnectionScreen *ui;
     QBluetoothDeviceDiscoveryAgent *discoveryAgent;
+    //void discoverDeviceServices(const QBluetoothAddress &address);
     QBluetoothSocket *socket;
     QMap<QString, QString> devicess;
     QMap<QString, int> rssiValues;
