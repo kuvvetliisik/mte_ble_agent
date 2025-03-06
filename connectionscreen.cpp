@@ -5,6 +5,7 @@
 #include <QCoreApplication>
 #include <QEventLoop>
 #include <QProcess>
+#include <QListView>
 
 ConnectionScreen::ConnectionScreen(QWidget *parent) :
     QWidget(parent),
@@ -13,6 +14,7 @@ ConnectionScreen::ConnectionScreen(QWidget *parent) :
     socket(nullptr)
 {
     ui->setupUi(this);
+
     ui->lblConnection->setText("🔴 Not Connected");
 
     connect(ui->btnScan, &QPushButton::clicked, this, &ConnectionScreen::updateBluetoothDevices);
@@ -39,6 +41,20 @@ ConnectionScreen::ConnectionScreen(QWidget *parent) :
             ui->comboBox->addItem(deviceStr);
         }
     });
+
+    QListView *comboListView = new QListView(ui->comboBox);
+    comboListView->setMaximumHeight(500);
+    comboListView->setFixedWidth(280);
+    comboListView->setStyleSheet(
+        "QComboBox::drop-down {"
+        "   border: none; "
+        "   background-color: #2E2E2E; "
+        "   width: 20px; "
+        "   padding: 0px; "
+        "   margin: 0px; "
+        "}"
+        );
+    ui->comboBox->setView(comboListView);
 }
 
 ConnectionScreen::~ConnectionScreen() {
@@ -46,11 +62,18 @@ ConnectionScreen::~ConnectionScreen() {
 }
 
 void ConnectionScreen::updateBluetoothDevices() {
+    ui->comboBox->setUpdatesEnabled(false);
     ui->comboBox->clear();
     devicess.clear();
     ui->lblConnection->setText("🔍 Scanning for devices...");
     ui->txtLog->append("🔍 Scanning for devices...");
+
+    if (discoveryAgent->isActive()) {
+        discoveryAgent->stop();
+    }
+
     discoveryAgent->start();
+    ui->comboBox->setUpdatesEnabled(true);
 }
 
 void ConnectionScreen::connectToDevice() {
@@ -70,16 +93,10 @@ void ConnectionScreen::connectToDevice() {
 
     QString macAddress = devicess[selectedDevice];
     QBluetoothAddress bluetoothAddress(macAddress);
-   // QBluetoothUuid serviceUuid("00001108-0000-1000-8000-00805f9b34fb");
-    QBluetoothUuid serviceUuid("0000110d-0000-1000-8000-00805f9b34fb"); // A2DP UUID
-
-    //QBluetoothUuid serviceUuid("0000110a-0000-1000-8000-00805f9b34fb");
+    QBluetoothUuid serviceUuid("0000110a-0000-1000-8000-00805f9b34fb");
 
     if (socket) {
-        // if (socket->isOpen()) {
-        //     socket->disconnectFromService();
-        // }
-        // delete socket;
+        delete socket;
         socket = nullptr;
     }
 
@@ -88,47 +105,40 @@ void ConnectionScreen::connectToDevice() {
     ui->lblConnection->setText("⏳ Connecting...");
     ui->txtLog->append("Connecting to device: " + selectedDevice);
 
-
     qDebug() << "🔹 [TEST] Trying to connect to Bluetooth device...";
     qDebug() << "   Selected Device: " << selectedDevice;
     qDebug() << "   MAC Address: " << macAddress;
     qDebug() << "   UUID: " << serviceUuid.toString();
 
+    socket->connectToService(bluetoothAddress, serviceUuid);
 
     connect(socket, &QBluetoothSocket::connected, this, [=]() {
         ui->lblConnection->setText("✅ Connected: " + selectedDevice);
-        ui->txtLog->append("Successfully connected to the device: " + selectedDevice);
+        ui->lblConnection->setStyleSheet("color: green; font-weight: bold; font-size: 18px;");
+        ui->txtLog->append("✅ Successfully connected to device: " + selectedDevice);
 
         int rssi = -99;
         if (rssiValues.contains(macAddress)) {
             rssi = rssiValues[macAddress];
         }
 
-        qDebug() << "🔹 CONNECTED SUCCESSFULLY!";
-        qDebug() << "🔹 Emitting deviceConnected SIGNAL!";
-        qDebug() << "Device Name: " << selectedDevice;
-        qDebug() << "MAC Address: " << macAddress;
-        qDebug() << "RSSI (Initial): " << rssi << " dBm";
-        qDebug() << "Bluetooth Level: " << bluetoothVersion;
         emit deviceConnected(selectedDevice, macAddress, rssi, bluetoothVersion);
 
         QTimer::singleShot(2000, this, [=]() {
-            if (rssiValues.contains(macAddress)) {
+            if (socket && socket->isOpen() && rssiValues.contains(macAddress)) {
                 int updatedRssi = rssiValues[macAddress];
                 qDebug() << "🔹 Updated RSSI after connection: " << updatedRssi << " dBm";
-                //emit deviceConnected(selectedDevice, macAddress, updatedRssi, bluetoothVersion);
+                emit deviceConnected(selectedDevice, macAddress, updatedRssi, bluetoothVersion);
             }
         });
     });
 
     connect(socket, &QBluetoothSocket::errorOccurred, this, [=](QBluetoothSocket::SocketError error) {
         ui->lblConnection->setText("⚠️ Connection error!");
+        ui->txtLog->append("⚠️ Connection Error: " + socket->errorString());
         qDebug() << "⚠️ Error Code: " << error;
-        //ui->txtLog->append("Connection error: " + socket->errorString());
         qDebug() << "⚠️ Connection Error: " << socket->errorString();
     });
-
-    socket->connectToService(bluetoothAddress, serviceUuid);
 }
 
 void ConnectionScreen::disconnectDevice() {
@@ -154,14 +164,26 @@ void ConnectionScreen::disconnectDevice() {
         QString macAddress = devicess[ui->comboBox->currentText()];
         QString command = "bluetoothctl disconnect " + macAddress;
 
-        QProcess process;
-        process.start("bash", QStringList() << "-c" << command);
-        process.waitForFinished();
-        qDebug() << "Bluetoothctl disconnect command executed for: " << macAddress;
+        QProcess *process = new QProcess(this);
+        connect(process, QOverload<QProcess::ProcessError>::of(&QProcess::errorOccurred), this, [=](QProcess::ProcessError error) {
+            ui->txtLog->append("⚠️ Process Error: " + process->errorString());
+            process->deleteLater();
+        });
+        connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [=](int exitCode, QProcess::ExitStatus exitStatus) {
+            if (exitStatus == QProcess::NormalExit && exitCode == 0) {
+                ui->txtLog->append("Bluetoothctl disconnect command executed successfully.");
+            } else {
+                ui->txtLog->append("⚠️ Bluetoothctl disconnect command failed.");
+            }
+            process->deleteLater();
+        });
+        process->start("bluetoothctl", QStringList() << "disconnect" << macAddress);
     }
 
-    delete socket;
-    socket = nullptr;
+    if (socket) {
+        delete socket;
+        socket = nullptr;
+    }
 
     ui->lblConnection->setText("❌ Disconnected");
     ui->txtLog->append("Bluetooth connection has been fully terminated.");

@@ -35,7 +35,6 @@ void DeviceInfo::updateDeviceInfo(QString deviceName, QString macAddress, int rs
         return;
     }
 
-
 }
 
 

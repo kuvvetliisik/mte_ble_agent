@@ -43,7 +43,7 @@ void MainWindow::handleDeviceConnected(QString deviceName, QString macAddress, i
     deviceInfo->ui->lblSignalStrength->setText(QString::number(rssi) + " dBm");
     deviceInfo->ui->lblBluetoothVersion->setText(bluetoothversion);
 
-    showDeviceInfo();
+    //showDeviceInfo();
 
 }
 
