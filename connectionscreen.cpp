@@ -102,7 +102,9 @@ void ConnectionScreen::connectToDevice() {
 
     socket = new QBluetoothSocket(QBluetoothServiceInfo::RfcommProtocol, this);
 
+    // **Bağlantı başlarken "Connecting..." yazsın**
     ui->lblConnection->setText("⏳ Connecting...");
+    ui->lblConnection->setStyleSheet("color: yellow; font-weight: bold;");
     ui->txtLog->append("Connecting to device: " + selectedDevice);
 
     qDebug() << "🔹 [TEST] Trying to connect to Bluetooth device...";
@@ -112,7 +114,9 @@ void ConnectionScreen::connectToDevice() {
 
     socket->connectToService(bluetoothAddress, serviceUuid);
 
+    // **Bağlantı başarılı olduğunda güncellenmesi için sinyal ekleyelim**
     connect(socket, &QBluetoothSocket::connected, this, [=]() {
+        qDebug() << "🔹 [TEST] Connection Established!";
         ui->lblConnection->setText("✅ Connected: " + selectedDevice);
         ui->lblConnection->setStyleSheet("color: green; font-weight: bold; font-size: 18px;");
         ui->txtLog->append("✅ Successfully connected to device: " + selectedDevice);
@@ -123,23 +127,27 @@ void ConnectionScreen::connectToDevice() {
         }
 
         emit deviceConnected(selectedDevice, macAddress, rssi, bluetoothVersion);
-
-        QTimer::singleShot(2000, this, [=]() {
-            if (socket && socket->isOpen() && rssiValues.contains(macAddress)) {
-                int updatedRssi = rssiValues[macAddress];
-                qDebug() << "🔹 Updated RSSI after connection: " << updatedRssi << " dBm";
-                emit deviceConnected(selectedDevice, macAddress, updatedRssi, bluetoothVersion);
-            }
-        });
     });
 
+    // **Bağlantıyı manuel olarak kontrol et**
+    QTimer::singleShot(3000, this, [=]() {
+        if (socket->isOpen()) {
+            qDebug() << "🔹 [TEST] Socket is still open, ensuring connection label update!";
+            ui->lblConnection->setText("✅ Connected: " + selectedDevice);
+            ui->lblConnection->setStyleSheet("color: green; font-weight: bold; font-size: 18px;");
+        }
+    });
+
+    // **Bağlantı hatasını yakala**
     connect(socket, &QBluetoothSocket::errorOccurred, this, [=](QBluetoothSocket::SocketError error) {
-        ui->lblConnection->setText("⚠️ Connection error!");
+        ui->lblConnection->setText("⚠️ Connection Failed!");
+        ui->lblConnection->setStyleSheet("color: red; font-weight: bold;");
         ui->txtLog->append("⚠️ Connection Error: " + socket->errorString());
         qDebug() << "⚠️ Error Code: " << error;
         qDebug() << "⚠️ Connection Error: " << socket->errorString();
     });
 }
+
 
 void ConnectionScreen::disconnectDevice() {
     if (!socket || !socket->isOpen()) {
