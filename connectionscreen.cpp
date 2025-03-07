@@ -11,7 +11,8 @@ ConnectionScreen::ConnectionScreen(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ConnectionScreen),
     discoveryAgent(new QBluetoothDeviceDiscoveryAgent(this)),
-    socket(nullptr)
+    socket(nullptr),
+    connectionCheckTimer(new QTimer(this))
 {
     ui->setupUi(this);
 
@@ -41,6 +42,13 @@ ConnectionScreen::ConnectionScreen(QWidget *parent) :
             ui->comboBox->addItem(deviceStr);
         }
     });
+
+    connect(connectionCheckTimer, &QTimer::timeout, this, [=]() {
+        if (socket && !socket->isOpen()) {
+            handleDisconnected();
+        }
+    });
+    connectionCheckTimer->start(5000);
 
     QListView *comboListView = new QListView(ui->comboBox);
     comboListView->setMaximumHeight(500);
@@ -102,7 +110,6 @@ void ConnectionScreen::connectToDevice() {
 
     socket = new QBluetoothSocket(QBluetoothServiceInfo::RfcommProtocol, this);
 
-    // **Bağlantı başlarken "Connecting..." yazsın**
     ui->lblConnection->setText("⏳ Connecting...");
     ui->lblConnection->setStyleSheet("color: yellow; font-weight: bold;");
     ui->txtLog->append("Connecting to device: " + selectedDevice);
@@ -114,7 +121,6 @@ void ConnectionScreen::connectToDevice() {
 
     socket->connectToService(bluetoothAddress, serviceUuid);
 
-    // **Bağlantı başarılı olduğunda güncellenmesi için sinyal ekleyelim**
     connect(socket, &QBluetoothSocket::connected, this, [=]() {
         qDebug() << "🔹 [TEST] Connection Established!";
         ui->lblConnection->setText("✅ Connected: " + selectedDevice);
@@ -127,9 +133,9 @@ void ConnectionScreen::connectToDevice() {
         }
 
         emit deviceConnected(selectedDevice, macAddress, rssi, bluetoothVersion);
+        connect(socket, &QBluetoothSocket::disconnected, this, &ConnectionScreen::handleDisconnected);
     });
 
-    // **Bağlantıyı manuel olarak kontrol et**
     QTimer::singleShot(3000, this, [=]() {
         if (socket->isOpen()) {
             qDebug() << "🔹 [TEST] Socket is still open, ensuring connection label update!";
@@ -138,13 +144,14 @@ void ConnectionScreen::connectToDevice() {
         }
     });
 
-    // **Bağlantı hatasını yakala**
     connect(socket, &QBluetoothSocket::errorOccurred, this, [=](QBluetoothSocket::SocketError error) {
         ui->lblConnection->setText("⚠️ Connection Failed!");
         ui->lblConnection->setStyleSheet("color: red; font-weight: bold;");
         ui->txtLog->append("⚠️ Connection Error: " + socket->errorString());
         qDebug() << "⚠️ Error Code: " << error;
         qDebug() << "⚠️ Connection Error: " << socket->errorString();
+        if (!socket || !socket->isOpen()) return;
+         handleDisconnected();
     });
 }
 
@@ -197,6 +204,23 @@ void ConnectionScreen::disconnectDevice() {
     ui->txtLog->append("Bluetooth connection has been fully terminated.");
     ui->btnConnect->setEnabled(true);
 }
+
+void ConnectionScreen::handleDisconnected() {
+    qDebug() << "⚠️ Bluetooth bağlantısı kesildi!";
+    ui->lblConnection->setText("🔴 Not Connected");
+    ui->lblConnection->setStyleSheet("color: red; font-weight: bold;");
+    ui->txtLog->append("⚠️ Device disconnected unexpectedly.");
+
+    emit deviceConnected("-", "-", -99, "Unknown");
+
+    if (socket) {
+        socket->deleteLater();
+        socket = nullptr;
+    }
+
+    ui->btnConnect->setEnabled(true);
+}
+
 
 void ConnectionScreen::clearLog() {
     ui->txtLog->clear();

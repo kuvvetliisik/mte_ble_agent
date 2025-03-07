@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(connectionScreen, &ConnectionScreen::deviceConnected, this, &MainWindow::handleDeviceConnected);
     connect(ui->btnConnectionScreen, &QPushButton::clicked, this, &MainWindow::showConnectionScreen);
     connect(ui->btnDeviceInfo, &QPushButton::clicked, this, &MainWindow::showDeviceInfo);
-
+    //connect(connectionScreen, &ConnectionScreen::deviceConnected, this, &MainWindow::handleDeviceConnected);
 }
 
 MainWindow::~MainWindow() {
@@ -27,26 +27,28 @@ MainWindow::~MainWindow() {
 void MainWindow::showConnectionScreen() {
     ui->stackedWidget->setCurrentWidget(connectionScreen);
 }
+void MainWindow::showDeviceInfo() {
+    ui->stackedWidget->setCurrentWidget(deviceInfo);
+}
 
 void MainWindow::handleDeviceConnected(QString deviceName, QString macAddress, int rssi, QString bluetoothversion )
 {
 
-    qDebug() << "✅ handleDeviceConnected() CALLED";
-    qDebug() << "Device Name: " << deviceName;
-    qDebug() << "MAC Address: " << macAddress;
-    qDebug() << "RSSI: " << rssi;
-    qDebug() << "Bluetooth Level: " << bluetoothversion;
-    deviceInfo->updateDeviceInfo(deviceName, macAddress, rssi, bluetoothversion);
+     qDebug() << "✅ handleDeviceConnected() CALLED";
+     qDebug() << "Device Name: " << deviceName;
+     qDebug() << "MAC Address: " << macAddress;
+     qDebug() << "RSSI: " << rssi;
+     qDebug() << "Bluetooth Level: " << bluetoothversion;
+     deviceInfo->updateDeviceInfo(deviceName, macAddress, rssi, bluetoothversion);
 
     deviceInfo->ui->lblDeviceName->setText(deviceName);
     deviceInfo->ui->lblMacAddress->setText(macAddress);
     deviceInfo->ui->lblSignalStrength->setText(QString::number(rssi) + " dBm");
     deviceInfo->ui->lblBluetoothVersion->setText(bluetoothversion);
+    deviceInfo->updateDeviceInfo(deviceName, macAddress, rssi, bluetoothversion);
 
     //showDeviceInfo();
 
 }
 
-void MainWindow::showDeviceInfo() {
-    ui->stackedWidget->setCurrentWidget(deviceInfo);
-}
+

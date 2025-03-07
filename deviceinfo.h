@@ -13,12 +13,12 @@ class DeviceInfo : public QWidget {
 
 public:
     explicit DeviceInfo(QWidget *parent = nullptr);
-    ~DeviceInfo();
     Ui::DeviceInfo *ui;
-
+    ~DeviceInfo();
     void updateDeviceInfo(QString deviceName, QString macAddress, int rssi, QString bluetoothVersion);
 
 private:
+     //Ui::DeviceInfo *ui;
 
 };
 

@@ -7,6 +7,7 @@
 #include <QBluetoothServiceDiscoveryAgent>
 #include <QBluetoothServiceInfo>
 #include <QMap>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {class ConnectionScreen;}
@@ -28,6 +29,9 @@ private slots:
     void connectToDevice();
     void disconnectDevice();
     void clearLog();
+    void handleDisconnected();
+
+
 
 private:
     Ui::ConnectionScreen *ui;
@@ -36,6 +40,7 @@ private:
     QBluetoothSocket *socket;
     QMap<QString, QString> devicess;
     QMap<QString, int> rssiValues;
+    QTimer *connectionCheckTimer;
 
 };
 
