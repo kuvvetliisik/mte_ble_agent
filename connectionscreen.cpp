@@ -45,10 +45,11 @@ ConnectionScreen::ConnectionScreen(QWidget *parent) :
 
     connect(connectionCheckTimer, &QTimer::timeout, this, [=]() {
         if (socket && !socket->isOpen()) {
+            qDebug()<< "⚠️ Bağlantı fiziksel olarak kopmuş, handleDisconnected() çağırılıyor!";
             handleDisconnected();
         }
     });
-    connectionCheckTimer->start(5000);
+    connectionCheckTimer->start(3000);
 
     QListView *comboListView = new QListView(ui->comboBox);
     comboListView->setMaximumHeight(500);
@@ -220,7 +221,6 @@ void ConnectionScreen::handleDisconnected() {
 
     ui->btnConnect->setEnabled(true);
 }
-
 
 void ConnectionScreen::clearLog() {
     ui->txtLog->clear();
