@@ -19,6 +19,9 @@ class ConnectionScreen : public QWidget
 
 public:
     explicit ConnectionScreen(QWidget *parent = nullptr);
+    void setScanButtonEnabled(bool enabled);
+    void clearDeviceList();
+    void setConnectionLabel(const QString &text);
     ~ConnectionScreen();
 
 signals:
@@ -36,7 +39,7 @@ private slots:
 private:
     Ui::ConnectionScreen *ui;
     QBluetoothDeviceDiscoveryAgent *discoveryAgent;
-    //void discoverDeviceServices(const QBluetoothAddress &address);
+    void discoverDeviceServices(const QBluetoothAddress &address);
     QBluetoothSocket *socket;
     QMap<QString, QString> devicess;
     QMap<QString, int> rssiValues;

@@ -1,5 +1,6 @@
 #include "connectionscreen.h"
 #include "ui_connectionscreen.h"
+#include "mainwindow.h"
 #include <QDebug>
 #include <QTimer>
 #include <QCoreApplication>
@@ -71,6 +72,8 @@ ConnectionScreen::~ConnectionScreen() {
 }
 
 void ConnectionScreen::updateBluetoothDevices() {
+
+
     ui->comboBox->setUpdatesEnabled(false);
     ui->comboBox->clear();
     devicess.clear();
@@ -132,9 +135,10 @@ void ConnectionScreen::connectToDevice() {
         if (rssiValues.contains(macAddress)) {
             rssi = rssiValues[macAddress];
         }
-
+        qDebug() << "⚡ Emit çağrılıyor: deviceConnected";
         emit deviceConnected(selectedDevice, macAddress, rssi, bluetoothVersion);
-        connect(socket, &QBluetoothSocket::disconnected, this, &ConnectionScreen::handleDisconnected);
+        bool success = connect(socket, &QBluetoothSocket::disconnected, this, &ConnectionScreen::handleDisconnected);
+        qDebug() << (success ? "✅ Signal-Slot bağlantısı başarılı!" : "❌ Signal-Slot bağlantısı başarısız!");
     });
 
     QTimer::singleShot(3000, this, [=]() {
@@ -156,7 +160,6 @@ void ConnectionScreen::connectToDevice() {
     });
 }
 
-
 void ConnectionScreen::disconnectDevice() {
     if (!socket || !socket->isOpen()) {
         ui->txtLog->append("⚠️ No active connection.");
@@ -166,8 +169,9 @@ void ConnectionScreen::disconnectDevice() {
 
     ui->lblConnection->setText("⏳ Disconnecting...");
     ui->txtLog->append("Disconnecting from device...");
+    qDebug() << "⚡ Emit çağrılıyor: devicedConnected";
 
-    emit deviceConnected("-", "-", -99, "Unknown");
+      emit deviceConnected("-", "-", -99, "Unknown");
 
     if (socket->isOpen()) {
         qDebug() << "Disconnecting from Bluetooth service...";
@@ -211,6 +215,7 @@ void ConnectionScreen::handleDisconnected() {
     ui->lblConnection->setText("🔴 Not Connected");
     ui->lblConnection->setStyleSheet("color: red; font-weight: bold;");
     ui->txtLog->append("⚠️ Device disconnected unexpectedly.");
+    qDebug() << "⚡ Emit çağrılıyor: devicehnConnected";
 
     emit deviceConnected("-", "-", -99, "Unknown");
 

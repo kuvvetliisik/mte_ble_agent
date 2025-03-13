@@ -31,7 +31,41 @@ QWidget::item {
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="1" rowspan="10">
+     <widget class="QStackedWidget" name="stackedWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="connectionScreen"/>
+      <widget class="QWidget" name="deviceInfo"/>
+     </widget>
+    </item>
     <item row="0" column="0">
+     <widget class="QPushButton" name="btnBluetooth">
+      <property name="styleSheet">
+       <string notr="true">QPushButton {
+    background-color: #5E81AC; /* Mavi Ton */
+    color: white;
+    border-radius: 5px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+QPushButton:hover {
+    background-color: #81A1C1; /* Açık Mavi */
+}
+
+QPushButton:pressed {
+    background-color: #4C566A; /* Koyu Gri */
+}
+</string>
+      </property>
+      <property name="text">
+       <string>Bluetooth Aç</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
      <widget class="QPushButton" name="btnConnectionScreen">
       <property name="styleSheet">
        <string notr="true">QPushButton {
@@ -56,13 +90,7 @@ QPushButton:pressed {
       </property>
      </widget>
     </item>
-    <item row="0" column="1" rowspan="5">
-     <widget class="QStackedWidget" name="stackedWidget">
-      <widget class="QWidget" name="connectionScreen"/>
-      <widget class="QWidget" name="deviceInfo"/>
-     </widget>
-    </item>
-    <item row="1" column="0">
+    <item row="2" column="0">
      <widget class="QPushButton" name="btnDeviceInfo">
       <property name="styleSheet">
        <string notr="true">QPushButton {
