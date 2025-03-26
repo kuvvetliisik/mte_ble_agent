@@ -154,8 +154,8 @@ QWidget#page_cihaz {
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="lblMacAddress">
+       <item row="5" column="0">
+        <widget class="QLabel" name="lblBluetoothVersion">
          <property name="styleSheet">
           <string notr="true">QLabel {
     font-size: 14px;
@@ -165,7 +165,7 @@ QWidget#page_cihaz {
 </string>
          </property>
          <property name="text">
-          <string>Mac Address :</string>
+          <string>Bluetooth Level :</string>
          </property>
         </widget>
        </item>
@@ -185,21 +185,6 @@ QWidget#page_cihaz {
         </widget>
        </item>
        <item row="3" column="0">
-        <widget class="QLabel" name="lblBluetoothVersion">
-         <property name="styleSheet">
-          <string notr="true">QLabel {
-    font-size: 14px;
-    font-weight: bold;
-    color: #66BB6A;
-}
-</string>
-         </property>
-         <property name="text">
-          <string>Bluetooth Level :</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
         <widget class="QLabel" name="lblSignalStrength">
          <property name="styleSheet">
           <string notr="true">QLabel {
@@ -214,16 +199,25 @@ QWidget#page_cihaz {
          </property>
         </widget>
        </item>
-       <item row="5" column="0">
-        <widget class="QTextEdit" name="textEditLogs">
+       <item row="1" column="0">
+        <widget class="QLabel" name="lblMacAddress">
          <property name="styleSheet">
-          <string notr="true">QTextEdit {
-    background-color: #2E3440; /* Koyu Gri */
-    color: #A3BE8C; /* Yeşil */
-    border-radius: 5px;
-    padding: 5px;
+          <string notr="true">QLabel {
+    font-size: 14px;
+    font-weight: bold;
+    color: #66BB6A;
 }
 </string>
+         </property>
+         <property name="text">
+          <string>Mac Address :</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="lblReceivedData">
+         <property name="text">
+          <string>lblreceiveddata</string>
          </property>
         </widget>
        </item>
