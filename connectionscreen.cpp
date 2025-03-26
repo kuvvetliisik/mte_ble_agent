@@ -45,10 +45,11 @@ ConnectionScreen::ConnectionScreen(QWidget *parent) :
     });
 
     connect(connectionCheckTimer, &QTimer::timeout, this, [=]() {
-        if (socket && !socket->isOpen()) {
-            qDebug()<< "⚠️ Bağlantı fiziksel olarak kopmuş, handleDisconnected() çağırılıyor!";
-            handleDisconnected();
-        }
+        qDebug() << "Timer tetiklendi";
+        if (socket)
+            qDebug() << "Socket status : " << socket;
+        if (socket)
+            qDebug() << "Socket is open : " << socket->isOpen();
     });
     connectionCheckTimer->start(3000);
 
@@ -124,21 +125,32 @@ void ConnectionScreen::connectToDevice() {
     qDebug() << "   UUID: " << serviceUuid.toString();
 
     socket->connectToService(bluetoothAddress, serviceUuid);
+    qDebug()<< "connecttoservice çağrıldı";
+
+    QTimer::singleShot(4000, this, [=]() {
+        if (socket && socket->isOpen()) {
+            qDebug() << "✅ GEÇ gelen bağlantı algılandı.";
+            emit deviceConnected(selectedDevice, macAddress, rssiValues.value(macAddress, -99), bluetoothVersion);
+        } else {
+            qDebug() << "❌ 4 saniye sonunda hala bağlantı yok.";
+        }
+    });
+
 
     connect(socket, &QBluetoothSocket::connected, this, [=]() {
-        qDebug() << "🔹 [TEST] Connection Established!";
+        qDebug() << "🔹 [TEST] ";
         ui->lblConnection->setText("✅ Connected: " + selectedDevice);
         ui->lblConnection->setStyleSheet("color: green; font-weight: bold; font-size: 18px;");
         ui->txtLog->append("✅ Successfully connected to device: " + selectedDevice);
 
-        int rssi = -99;
+        /*int rssi = -99;
         if (rssiValues.contains(macAddress)) {
             rssi = rssiValues[macAddress];
         }
         qDebug() << "⚡ Emit çağrılıyor: deviceConnected";
-        emit deviceConnected(selectedDevice, macAddress, rssi, bluetoothVersion);
-        bool success = connect(socket, &QBluetoothSocket::disconnected, this, &ConnectionScreen::handleDisconnected);
-        qDebug() << (success ? "✅ Signal-Slot bağlantısı başarılı!" : "❌ Signal-Slot bağlantısı başarısız!");
+*/
+    //emit deviceConnected(selectedDevice, macAddress, rssi, bluetoothVersion);
+
     });
 
     QTimer::singleShot(3000, this, [=]() {
@@ -147,6 +159,7 @@ void ConnectionScreen::connectToDevice() {
             ui->lblConnection->setText("✅ Connected: " + selectedDevice);
             ui->lblConnection->setStyleSheet("color: green; font-weight: bold; font-size: 18px;");
         }
+
     });
 
     connect(socket, &QBluetoothSocket::errorOccurred, this, [=](QBluetoothSocket::SocketError error) {
@@ -155,8 +168,6 @@ void ConnectionScreen::connectToDevice() {
         ui->txtLog->append("⚠️ Connection Error: " + socket->errorString());
         qDebug() << "⚠️ Error Code: " << error;
         qDebug() << "⚠️ Connection Error: " << socket->errorString();
-        if (!socket || !socket->isOpen()) return;
-         handleDisconnected();
     });
 }
 
@@ -171,7 +182,7 @@ void ConnectionScreen::disconnectDevice() {
     ui->txtLog->append("Disconnecting from device...");
     qDebug() << "⚡ Emit çağrılıyor: devicedConnected";
 
-      emit deviceConnected("-", "-", -99, "Unknown");
+   // emit deviceConnected(selectedDevice, macAddress, rssi, bluetoothVersion);
 
     if (socket->isOpen()) {
         qDebug() << "Disconnecting from Bluetooth service...";
@@ -210,23 +221,11 @@ void ConnectionScreen::disconnectDevice() {
     ui->btnConnect->setEnabled(true);
 }
 
-void ConnectionScreen::handleDisconnected() {
-    qDebug() << "⚠️ Bluetooth bağlantısı kesildi!";
-    ui->lblConnection->setText("🔴 Not Connected");
-    ui->lblConnection->setStyleSheet("color: red; font-weight: bold;");
-    ui->txtLog->append("⚠️ Device disconnected unexpectedly.");
-    qDebug() << "⚡ Emit çağrılıyor: devicehnConnected";
 
-    emit deviceConnected("-", "-", -99, "Unknown");
+//void ConnectionScreen::handleDeviceConnected(){
 
-    if (socket) {
-        socket->deleteLater();
-        socket = nullptr;
-    }
 
-    ui->btnConnect->setEnabled(true);
-}
-
+//}
 void ConnectionScreen::clearLog() {
     ui->txtLog->clear();
 }

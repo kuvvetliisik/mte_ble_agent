@@ -22,19 +22,28 @@ public:
     void setScanButtonEnabled(bool enabled);
     void clearDeviceList();
     void setConnectionLabel(const QString &text);
+    static QString getBluetoothVersionFromHciconfig();
     ~ConnectionScreen();
 
 signals:
     void deviceConnected(QString deviceName, QString macAddress, int rssi, QString bluetoothversion);
+    void deviceDisconnected();
+    void dataReceivedFromDevice(const QString &message);
+    void deviceNameReceived(const QString &deviceName);
 
 private slots:
     void updateBluetoothDevices();
     void connectToDevice();
     void disconnectDevice();
     void clearLog();
-    void handleDisconnected();
-
-
+    //void handleDisconnected();
+    //void emitDisconnectionSignal();
+    //void resetUIAfterDisconnection();
+   // void terminateSocketConnection();
+    //void readSocketData();
+    //void updateLiveRSSI();
+    //void onSocketConnected();
+    //void startLiveRSSIMonitor(const QString& mac, const QString& name, const QString& btver);
 
 private:
     Ui::ConnectionScreen *ui;
@@ -44,6 +53,17 @@ private:
     QMap<QString, QString> devicess;
     QMap<QString, int> rssiValues;
     QTimer *connectionCheckTimer;
+    //QTimer* rssiMonitorTimer;
+    //QString currentConnectedMac;
+    //QString currentConnectedName;
+    //QString currentBluetoothVersion;
+    bool isDisconnectedByUser;
+    bool prepareForConnection(QString &macAddress, QString &deviceName);
+    //void initSocket(const QBluetoothAddress &bluetoothAddress, const QBluetoothUuid &uuid);
+    //void setupSocketSignals(const QString &deviceName, const QString &macAddress, const QString &bluetoothVersion);
+    //void updateUIOnConnectionSuccess(const QString &deviceName);
+    //void sendDisconnectCommandToSystem(const QString &macAddress);
+
 
 };
 

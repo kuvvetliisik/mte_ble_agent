@@ -12,17 +12,18 @@ MainWindow::MainWindow(QWidget *parent)
     ui->stackedWidget->addWidget(connectionScreen);
     ui->stackedWidget->addWidget(deviceInfo);
 
-    connect(connectionScreen, &ConnectionScreen::deviceConnected, this, &MainWindow::handleDeviceConnected);
+    //connect(connectionScreen, &ConnectionScreen::deviceConnected, this, &MainWindow::handleDeviceConnected);
     connect(ui->btnConnectionScreen, &QPushButton::clicked, this, &MainWindow::showConnectionScreen);
     connect(ui->btnDeviceInfo, &QPushButton::clicked, this, &MainWindow::showDeviceInfo);
     connect(ui->btnBluetooth, &QPushButton::clicked, this, &MainWindow::toggleBluetooth);
+    connect(connectionScreen, &ConnectionScreen::dataReceivedFromDevice, this, &MainWindow::handleDeviceData);
+
     //connect(connectionScreen, &ConnectionScreen::deviceConnected, this, &MainWindow::handleDeviceConnected);
     qDebug() << "connectionScreen nesnesi: " << connectionScreen;
     qDebug() << "deviceInfo nesnesi: " << deviceInfo;
     bool success = connect(connectionScreen, &ConnectionScreen::deviceConnected, this, &MainWindow::handleDeviceConnected);
     qDebug() << (success ? "✅ Signal-Slot bağlantısı başarılı!" : "❌ Signal-Slot bağlantısı başarısız!");
     checkBluetoothStatus();
-
 }
 
 MainWindow::~MainWindow() {
@@ -41,8 +42,6 @@ void MainWindow::showDeviceInfo() {
     ui->stackedWidget->setCurrentWidget(deviceInfo);
 }
 
-
-
 void MainWindow::handleDeviceConnected(QString deviceName, QString macAddress, int rssi, QString bluetoothversion )
 {
 
@@ -51,16 +50,29 @@ void MainWindow::handleDeviceConnected(QString deviceName, QString macAddress, i
      qDebug() << "MAC Address: " << macAddress;
      qDebug() << "RSSI: " << rssi;
      qDebug() << "Bluetooth Level: " << bluetoothversion;
-     deviceInfo->updateDeviceInfo(deviceName, macAddress, rssi, bluetoothversion);
+     //deviceInfo->updateDeviceInfo(deviceName, macAddress, rssi, bluetoothversion);
 
-    deviceInfo->ui->lblDeviceName->setText(deviceName);
+    /*deviceInfo->ui->lblDeviceName->setText(deviceName);
     deviceInfo->ui->lblMacAddress->setText(macAddress);
     deviceInfo->ui->lblSignalStrength->setText(QString::number(rssi) + " dBm");
-    deviceInfo->ui->lblBluetoothVersion->setText(bluetoothversion);
+    deviceInfo->ui->lblBluetoothVersion->setText(bluetoothversion);*/
     deviceInfo->updateDeviceInfo(deviceName, macAddress, rssi, bluetoothversion);
 
     showDeviceInfo();
 }
+void MainWindow::handleDeviceData(const QString &message)
+{
+    if (deviceInfo && deviceInfo->ui) {
+        deviceInfo->ui->lblReceivedData->setText(message);
+    }
+}
+
+void MainWindow::handleDeviceName(const QString &name)
+{
+    //ui->statusBar->showMessage("Cihaz Adı Alındı: " + name);
+    deviceInfo->ui->lblDeviceName->setText("Device Name: " + name);
+}
+
 
 void MainWindow::toggleBluetooth() {
     static bool isBluetoothOn = false;
@@ -129,7 +141,6 @@ void MainWindow::toggleBluetooth() {
     isBluetoothOn = !isBluetoothOn;
 }
 
-
 void MainWindow::checkBluetoothStatus() {
     QProcess process;
     process.start("rfkill list bluetooth");
@@ -142,5 +153,3 @@ void MainWindow::checkBluetoothStatus() {
         ui->btnBluetooth->setText("Bluetooth Aç");
     }
 }
-
-

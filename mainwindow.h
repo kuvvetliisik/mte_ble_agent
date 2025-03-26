@@ -22,6 +22,9 @@ private slots:
     void toggleBluetooth();
     void checkBluetoothStatus();
     void handleDeviceConnected(QString deviceName, QString macAddress, int rssi, QString bluetoothversion);
+    void handleDeviceData(const QString &message);
+    void handleDeviceName(const QString &deviceName);
+
 private:
     Ui::MainWindow *ui;
     DeviceInfo *deviceInfo;
