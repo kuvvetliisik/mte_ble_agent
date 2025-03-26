@@ -15,15 +15,14 @@ MainWindow::MainWindow(QWidget *parent)
     //connect(connectionScreen, &ConnectionScreen::deviceConnected, this, &MainWindow::handleDeviceConnected);
     connect(ui->btnConnectionScreen, &QPushButton::clicked, this, &MainWindow::showConnectionScreen);
     connect(ui->btnDeviceInfo, &QPushButton::clicked, this, &MainWindow::showDeviceInfo);
-    connect(ui->btnBluetooth, &QPushButton::clicked, this, &MainWindow::toggleBluetooth);
-    connect(connectionScreen, &ConnectionScreen::dataReceivedFromDevice, this, &MainWindow::handleDeviceData);
+    //connect(connectionScreen, &ConnectionScreen::dataReceivedFromDevice, this, &MainWindow::handleDeviceData);
 
     //connect(connectionScreen, &ConnectionScreen::deviceConnected, this, &MainWindow::handleDeviceConnected);
     qDebug() << "connectionScreen nesnesi: " << connectionScreen;
     qDebug() << "deviceInfo nesnesi: " << deviceInfo;
     bool success = connect(connectionScreen, &ConnectionScreen::deviceConnected, this, &MainWindow::handleDeviceConnected);
     qDebug() << (success ? "✅ Signal-Slot bağlantısı başarılı!" : "❌ Signal-Slot bağlantısı başarısız!");
-    checkBluetoothStatus();
+    //checkBluetoothStatus();
 }
 
 MainWindow::~MainWindow() {
@@ -60,7 +59,7 @@ void MainWindow::handleDeviceConnected(QString deviceName, QString macAddress, i
 
     showDeviceInfo();
 }
-void MainWindow::handleDeviceData(const QString &message)
+/*void MainWindow::handleDeviceData(const QString &message)
 {
     if (deviceInfo && deviceInfo->ui) {
         deviceInfo->ui->lblReceivedData->setText(message);
@@ -72,9 +71,9 @@ void MainWindow::handleDeviceName(const QString &name)
     //ui->statusBar->showMessage("Cihaz Adı Alındı: " + name);
     deviceInfo->ui->lblDeviceName->setText("Device Name: " + name);
 }
+*/
 
-
-void MainWindow::toggleBluetooth() {
+/*void MainWindow::toggleBluetooth() {
     static bool isBluetoothOn = false;
 
     QProcess process;
@@ -153,3 +152,4 @@ void MainWindow::checkBluetoothStatus() {
         ui->btnBluetooth->setText("Bluetooth Aç");
     }
 }
+*/

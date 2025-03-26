@@ -34,7 +34,7 @@ QWidget::item:selected {
 }</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="2">
+   <item row="1" column="1">
     <widget class="QPushButton" name="pushButton_3">
      <property name="styleSheet">
       <string notr="true">QPushButton {
@@ -56,31 +56,6 @@ QPushButton:pressed {
      </property>
      <property name="text">
       <string>Send Test</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QPushButton" name="btnForgetDevice">
-     <property name="styleSheet">
-      <string notr="true">QPushButton {
-    background-color: #5E81AC; /* Mavi Ton */
-    color: white;
-    border-radius: 5px;
-    padding: 8px;
-    font-size: 14px;
-}
-
-QPushButton:hover {
-    background-color: #81A1C1; /* Açık Mavi */
-}
-
-QPushButton:pressed {
-    background-color: #4C566A; /* Koyu Gri */
-}
-</string>
-     </property>
-     <property name="text">
-      <string>Forget The Device</string>
      </property>
     </widget>
    </item>
@@ -109,7 +84,7 @@ QPushButton:pressed {
      </property>
     </widget>
    </item>
-   <item row="0" column="0" colspan="3">
+   <item row="0" column="0" colspan="2">
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="styleSheet">
       <string notr="true">QStackedWidget {
@@ -139,21 +114,6 @@ QWidget#page_cihaz {
      </property>
      <widget class="QWidget" name="page_3">
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="0">
-        <widget class="QLabel" name="lblDeviceName">
-         <property name="styleSheet">
-          <string notr="true">QLabel {
-    font-size: 14px;
-    font-weight: bold;
-    color: #66BB6A;
-}
-</string>
-         </property>
-         <property name="text">
-          <string>Device Name :</string>
-         </property>
-        </widget>
-       </item>
        <item row="5" column="0">
         <widget class="QLabel" name="lblBluetoothVersion">
          <property name="styleSheet">
@@ -169,22 +129,7 @@ QWidget#page_cihaz {
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="lblConnectionStatus_2">
-         <property name="styleSheet">
-          <string notr="true">QLabel {
-    font-size: 14px;
-    font-weight: bold;
-    color: #66BB6A;
-}
-</string>
-         </property>
-         <property name="text">
-          <string>Connection Status :</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
+       <item row="4" column="0">
         <widget class="QLabel" name="lblSignalStrength">
          <property name="styleSheet">
           <string notr="true">QLabel {
@@ -199,7 +144,7 @@ QWidget#page_cihaz {
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
+       <item row="2" column="0">
         <widget class="QLabel" name="lblMacAddress">
          <property name="styleSheet">
           <string notr="true">QLabel {
@@ -214,10 +159,33 @@ QWidget#page_cihaz {
          </property>
         </widget>
        </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="lblReceivedData">
+       <item row="3" column="0">
+        <widget class="QLabel" name="lblConnectionStatus_2">
+         <property name="styleSheet">
+          <string notr="true">QLabel {
+    font-size: 14px;
+    font-weight: bold;
+    color: #66BB6A;
+}
+</string>
+         </property>
          <property name="text">
-          <string>lblreceiveddata</string>
+          <string>Connection Status :</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="lblDeviceName">
+         <property name="styleSheet">
+          <string notr="true">QLabel {
+    font-size: 14px;
+    font-weight: bold;
+    color: #66BB6A;
+}
+</string>
+         </property>
+         <property name="text">
+          <string>Device Name :</string>
          </property>
         </widget>
        </item>

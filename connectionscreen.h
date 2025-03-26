@@ -24,6 +24,8 @@ public:
     void setConnectionLabel(const QString &text);
     static QString getBluetoothVersionFromHciconfig();
     ~ConnectionScreen();
+    double calculateDistance(int measuredPower, int rssi, double N = 2.0);
+
 
 signals:
     void deviceConnected(QString deviceName, QString macAddress, int rssi, QString bluetoothversion);

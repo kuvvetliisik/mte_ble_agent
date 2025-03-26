@@ -28,9 +28,15 @@ ConnectionScreen::ConnectionScreen(QWidget *parent) :
         QString deviceName = device.name().trimmed();
         QString macAddress = device.address().toString();
         int rssi = device.rssi();
+        qDebug() << "📶 Cihaz RSSI:" << rssi;
 
         if (deviceName.isEmpty()) {
             deviceName = macAddress;
+        }
+
+        if (rssi == 0) {
+            qDebug() << "⚠️ Geçersiz RSSI (0), cihaz atlandı:" << device.address().toString();
+            return; // cihazı ekleme
         }
 
         const auto deviceStr = QString("%1=%2").arg(deviceName).arg(macAddress);
@@ -92,6 +98,8 @@ void ConnectionScreen::updateBluetoothDevices() {
 void ConnectionScreen::connectToDevice() {
     QString selectedDevice = ui->comboBox->currentText();
     QString bluetoothVersion = "Unknown";
+    bool connectedSuccessfully = false;
+
 
     if (socket && socket->isOpen()) {
         ui->txtLog->append("⚠️ Device is already connected: " + selectedDevice);
@@ -105,6 +113,8 @@ void ConnectionScreen::connectToDevice() {
     }
 
     QString macAddress = devicess[selectedDevice];
+    int rssi = rssiValues.value(macAddress, -99);
+
     QBluetoothAddress bluetoothAddress(macAddress);
     QBluetoothUuid serviceUuid("0000110a-0000-1000-8000-00805f9b34fb");
 
@@ -126,8 +136,20 @@ void ConnectionScreen::connectToDevice() {
 
     socket->connectToService(bluetoothAddress, serviceUuid);
     qDebug()<< "connecttoservice çağrıldı";
+    auto finalizeConnection = [=]() {
+        if (socket && socket->isOpen()) {
+            qDebug() << "✅ Bağlantı başarılı, emit deviceConnected";
+            emit deviceConnected(selectedDevice, macAddress, rssiValues.value(macAddress, -99), bluetoothVersion);
+            ui->lblConnection->setText("✅ Connected: " + selectedDevice);
+            ui->lblConnection->setStyleSheet("color: green; font-weight: bold; font-size: 18px;");
+            ui->txtLog->append("✅ Connected to device: " + selectedDevice);
+        } else {
+            qDebug() << "❌ finalizeConnection: socket açık değil!";
+        }
+    };
 
-    QTimer::singleShot(4000, this, [=]() {
+//Timerın eklenme sebebi signal slotun yakalanmamasından dolayı eklenmiştir.
+   /* QTimer::singleShot(4000, this, [=]() {
         if (socket && socket->isOpen()) {
             qDebug() << "✅ GEÇ gelen bağlantı algılandı.";
             emit deviceConnected(selectedDevice, macAddress, rssiValues.value(macAddress, -99), bluetoothVersion);
@@ -148,10 +170,10 @@ void ConnectionScreen::connectToDevice() {
             rssi = rssiValues[macAddress];
         }
         qDebug() << "⚡ Emit çağrılıyor: deviceConnected";
-*/
-    //emit deviceConnected(selectedDevice, macAddress, rssi, bluetoothVersion);
 
-    });
+    emit deviceConnected(selectedDevice, macAddress, rssi, bluetoothVersion);
+
+   });
 
     QTimer::singleShot(3000, this, [=]() {
         if (socket->isOpen()) {
@@ -161,7 +183,14 @@ void ConnectionScreen::connectToDevice() {
         }
 
     });
+*/
 
+    double distance = calculateDistance(-59, rssi); // -59 = referans sinyal (1 metre)
+    qDebug() << "📏 Estimated distance: " << distance << " metre";
+    ui->txtLog->append("📏 Estimated distance: " + QString::number(distance, 'f', 2) + " m");
+
+    connect(socket, &QBluetoothSocket::connected, this, finalizeConnection);
+    QTimer::singleShot(4000, this, finalizeConnection);
     connect(socket, &QBluetoothSocket::errorOccurred, this, [=](QBluetoothSocket::SocketError error) {
         ui->lblConnection->setText("⚠️ Connection Failed!");
         ui->lblConnection->setStyleSheet("color: red; font-weight: bold;");
@@ -219,6 +248,13 @@ void ConnectionScreen::disconnectDevice() {
     ui->lblConnection->setText("❌ Disconnected");
     ui->txtLog->append("Bluetooth connection has been fully terminated.");
     ui->btnConnect->setEnabled(true);
+}
+double ConnectionScreen::calculateDistance(int measuredPower, int rssi, double N)
+{
+    // Distance = 10 ^ ((Measured Power - RSSI) / (10 * N))
+    double exponent = (measuredPower - rssi) / (10.0 * N);
+    double distance = pow(10.0, exponent);
+    return distance;
 }
 
 
