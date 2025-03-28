@@ -24,8 +24,6 @@ public:
     void setConnectionLabel(const QString &text);
     static QString getBluetoothVersionFromHciconfig();
     ~ConnectionScreen();
-    double calculateDistance(int measuredPower, int rssi, double N = 2.0);
-
 
 signals:
     void deviceConnected(QString deviceName, QString macAddress, int rssi, QString bluetoothversion);
@@ -46,7 +44,8 @@ private slots:
     //void updateLiveRSSI();
     //void onSocketConnected();
     //void startLiveRSSIMonitor(const QString& mac, const QString& name, const QString& btver);
-
+    double calculateDistance(int measuredPower, int rssi, double N = 2.0);
+    double guessNFromRSSI(int rssi);
 private:
     Ui::ConnectionScreen *ui;
     QBluetoothDeviceDiscoveryAgent *discoveryAgent;
@@ -65,6 +64,7 @@ private:
     //void setupSocketSignals(const QString &deviceName, const QString &macAddress, const QString &bluetoothVersion);
     //void updateUIOnConnectionSuccess(const QString &deviceName);
     //void sendDisconnectCommandToSystem(const QString &macAddress);
+
 
 
 };

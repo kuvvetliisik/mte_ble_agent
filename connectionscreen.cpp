@@ -35,8 +35,8 @@ ConnectionScreen::ConnectionScreen(QWidget *parent) :
         }
 
         if (rssi == 0) {
-            qDebug() << "⚠️ Geçersiz RSSI (0), cihaz atlandı:" << device.address().toString();
-            return; // cihazı ekleme
+            qDebug() << "⚠️ Geçersiz RSSI, cihaz atlandı:" << device.address().toString();
+            return; //
         }
 
         const auto deviceStr = QString("%1=%2").arg(deviceName).arg(macAddress);
@@ -143,9 +143,21 @@ void ConnectionScreen::connectToDevice() {
             ui->lblConnection->setText("✅ Connected: " + selectedDevice);
             ui->lblConnection->setStyleSheet("color: green; font-weight: bold; font-size: 18px;");
             ui->txtLog->append("✅ Connected to device: " + selectedDevice);
-        } else {
+
+        int rssi = rssiValues.value(macAddress, -99);
+        double estimatedN = guessNFromRSSI(rssi);
+        double distance = calculateDistance(-59, rssi, estimatedN);
+        qDebug() << "📏 Estimated distance: " << distance << " metre";
+
+        ui->txtLog->append("📡 RSSI: " + QString::number(rssi));
+        ui->txtLog->append("📏 Estimated distance: " + QString::number(distance, 'f', 2) + " m");
+        ui->txtLog->append("📏 Mesafe: " + QString::number(distance, 'f', 2) + " m");
+        }
+
+        else {
             qDebug() << "❌ finalizeConnection: socket açık değil!";
         }
+
     };
 
 //Timerın eklenme sebebi signal slotun yakalanmamasından dolayı eklenmiştir.
@@ -185,9 +197,6 @@ void ConnectionScreen::connectToDevice() {
     });
 */
 
-    double distance = calculateDistance(-59, rssi); // -59 = referans sinyal (1 metre)
-    qDebug() << "📏 Estimated distance: " << distance << " metre";
-    ui->txtLog->append("📏 Estimated distance: " + QString::number(distance, 'f', 2) + " m");
 
     connect(socket, &QBluetoothSocket::connected, this, finalizeConnection);
     QTimer::singleShot(4000, this, finalizeConnection);
@@ -197,6 +206,7 @@ void ConnectionScreen::connectToDevice() {
         ui->txtLog->append("⚠️ Connection Error: " + socket->errorString());
         qDebug() << "⚠️ Error Code: " << error;
         qDebug() << "⚠️ Connection Error: " << socket->errorString();
+
     });
 }
 
@@ -257,11 +267,14 @@ double ConnectionScreen::calculateDistance(int measuredPower, int rssi, double N
     return distance;
 }
 
+double ConnectionScreen::guessNFromRSSI(int rssi) {
+    if (rssi >= -50) return 1.5;
+    if (rssi >= -60) return 2.0;
+    if (rssi >= -70) return 2.5;
+    if (rssi >= -80) return 3.0;
+    return 3.5;
+}
 
-//void ConnectionScreen::handleDeviceConnected(){
-
-
-//}
 void ConnectionScreen::clearLog() {
     ui->txtLog->clear();
 }

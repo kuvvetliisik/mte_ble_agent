@@ -27,45 +27,6 @@ QWidget {
 </string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0" colspan="4">
-    <widget class="QLabel" name="lblConnection">
-     <property name="styleSheet">
-      <string notr="true">
-QLabel {
-    color: #00FF00; 
-    font-weight: bold;
-}</string>
-     </property>
-     <property name="text">
-      <string>Connection Status</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="3">
-    <widget class="QPushButton" name="btnClear">
-     <property name="styleSheet">
-      <string notr="true">QPushButton {
-    background-color: #5E81AC; /* Mavi Ton */
-    color: white;
-    border-radius: 5px;
-    padding: 8px;
-    font-size: 14px;
-}
-
-QPushButton:hover {
-    background-color: #81A1C1; /* Açık Mavi */
-}
-
-QPushButton:pressed {
-    background-color: #4C566A; /* Koyu Gri */
-}
-</string>
-     </property>
-     <property name="text">
-      <string>Clear</string>
-     </property>
-    </widget>
-   </item>
    <item row="2" column="0" colspan="4">
     <widget class="QTextEdit" name="txtLog">
      <property name="styleSheet">
@@ -76,28 +37,6 @@ QTextEdit {
     border: 1px solid gray;
     padding: 5px;
 }</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0">
-    <widget class="QPushButton" name="btnScan">
-     <property name="styleSheet">
-      <string notr="true">QPushButton {
-    background-color: #5E81AC; /* Mavi Ton */
-    color: white;
-    border-radius: 5px;
-    padding: 8px;
-    font-size: 14px;
-}
-
-
-QPushButton:pressed {
-    background-color: #4C566A; /* Koyu Gri */
-}
-</string>
-     </property>
-     <property name="text">
-      <string>Scan Devices</string>
      </property>
     </widget>
    </item>
@@ -126,6 +65,31 @@ QPushButton:pressed {
      </property>
     </widget>
    </item>
+   <item row="3" column="3">
+    <widget class="QPushButton" name="btnClear">
+     <property name="styleSheet">
+      <string notr="true">QPushButton {
+    background-color: #5E81AC; /* Mavi Ton */
+    color: white;
+    border-radius: 5px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+QPushButton:hover {
+    background-color: #81A1C1; /* Açık Mavi */
+}
+
+QPushButton:pressed {
+    background-color: #4C566A; /* Koyu Gri */
+}
+</string>
+     </property>
+     <property name="text">
+      <string>Clear</string>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="2">
     <widget class="QPushButton" name="btnConnect">
      <property name="styleSheet">
@@ -148,6 +112,28 @@ QPushButton:pressed {
      </property>
      <property name="text">
       <string>Connect</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QPushButton" name="btnScan">
+     <property name="styleSheet">
+      <string notr="true">QPushButton {
+    background-color: #5E81AC; /* Mavi Ton */
+    color: white;
+    border-radius: 5px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+
+QPushButton:pressed {
+    background-color: #4C566A; /* Koyu Gri */
+}
+</string>
+     </property>
+     <property name="text">
+      <string>Scan Devices</string>
      </property>
     </widget>
    </item>
@@ -197,6 +183,20 @@ QPushButton:pressed {
      </property>
      <property name="sizeAdjustPolicy">
       <enum>QComboBox::SizeAdjustPolicy::AdjustToMinimumContentsLengthWithIcon</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="4">
+    <widget class="QLabel" name="lblConnection">
+     <property name="styleSheet">
+      <string notr="true">
+QLabel {
+    color: #00FF00; 
+    font-weight: bold;
+}</string>
+     </property>
+     <property name="text">
+      <string>Connection Status</string>
      </property>
     </widget>
    </item>
