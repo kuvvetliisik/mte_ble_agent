@@ -24,6 +24,7 @@ private slots:
     void handleDeviceConnected(QString deviceName, QString macAddress, int rssi, QString bluetoothversion);
     //void handleDeviceData(const QString &message);
     //void handleDeviceName(const QString &deviceName);
+    // void refreshConnectionFromDeviceInfo();
 
 private:
     Ui::MainWindow *ui;

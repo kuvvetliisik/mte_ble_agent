@@ -16,6 +16,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->btnConnectionScreen, &QPushButton::clicked, this, &MainWindow::showConnectionScreen);
     connect(ui->btnDeviceInfo, &QPushButton::clicked, this, &MainWindow::showDeviceInfo);
     //connect(connectionScreen, &ConnectionScreen::dataReceivedFromDevice, this, &MainWindow::handleDeviceData);
+    //connect(deviceInfo->ui->btnRefresh, &QPushButton::clicked, this, &MainWindow::refreshConnectionFromDeviceInfo);
+
 
     //connect(connectionScreen, &ConnectionScreen::deviceConnected, this, &MainWindow::handleDeviceConnected);
     qDebug() << "connectionScreen nesnesi: " << connectionScreen;
@@ -23,6 +25,13 @@ MainWindow::MainWindow(QWidget *parent)
     bool success = connect(connectionScreen, &ConnectionScreen::deviceConnected, this, &MainWindow::handleDeviceConnected);
     qDebug() << (success ? "✅ Signal-Slot bağlantısı başarılı!" : "❌ Signal-Slot bağlantısı başarısız!");
     //checkBluetoothStatus();
+    /*connect(connectionScreen, &ConnectionScreen::bluetoothDisconnected, this, [=]() {
+        qDebug() << "🔁 bluetoothDisconnected sinyali alındı, yeniden bağlanılıyor...";
+        QTimer::singleShot(1000, this, [=]() {
+            connectionScreen->connectToDevice();
+        });
+    });*/
+
 }
 
 MainWindow::~MainWindow() {
@@ -59,97 +68,22 @@ void MainWindow::handleDeviceConnected(QString deviceName, QString macAddress, i
 
     showDeviceInfo();
 }
-/*void MainWindow::handleDeviceData(const QString &message)
-{
-    if (deviceInfo && deviceInfo->ui) {
-        deviceInfo->ui->lblReceivedData->setText(message);
-    }
-}
 
-void MainWindow::handleDeviceName(const QString &name)
-{
-    //ui->statusBar->showMessage("Cihaz Adı Alındı: " + name);
-    deviceInfo->ui->lblDeviceName->setText("Device Name: " + name);
-}
-*/
+/*void MainWindow::refreshConnectionFromDeviceInfo() {
+    qDebug() << "🔄 Refresh button clicked from DeviceInfo screen.";
 
-/*void MainWindow::toggleBluetooth() {
-    static bool isBluetoothOn = false;
+    if (connectionScreen) {
+        qDebug() << "🔄 connectionScreen->disconnectDevice(); çağrılıyor...";
+        connectionScreen->disconnectDevice();
 
-    QProcess process;
-    QString command;
+        QTimer::singleShot(2000, this, [=]() {
+            qDebug() << "🔁 Timeout sonrası bağlantı tekrar deneniyor.";
+            connectionScreen->connectToDevice();
+        });
 
-    if (!isBluetoothOn) {
-        qDebug() << "🔹 Bluetooth Açılıyor...";
-
-        command = "sudo rfkill unblock bluetooth";
-        process.start(command);
-        process.waitForFinished();
-        qDebug() << "rfkill unblock stdout: " << process.readAllStandardOutput();
-        qDebug() << "rfkill unblock stderr: " << process.readAllStandardError();
-
-        command = "sudo systemctl restart bluetooth.service";
-        process.start(command);
-        process.waitForFinished();
-        qDebug() << "systemctl restart stdout: " << process.readAllStandardOutput();
-        qDebug() << "systemctl restart stderr: " << process.readAllStandardError();
-
-        command = "bluetoothctl power on";
-        process.start(command);
-        process.waitForFinished();
-        qDebug() << "bluetoothctl power on stdout: " << process.readAllStandardOutput();
-        qDebug() << "bluetoothctl power on stderr: " << process.readAllStandardError();
-
-        command = "sudo hciconfig hci0 up";
-        process.start(command);
-        process.waitForFinished();
-        qDebug() << "hciconfig hci0 up stdout: " << process.readAllStandardOutput();
-        qDebug() << "hciconfig hci0 up stderr: " << process.readAllStandardError();
-
-        ui->btnBluetooth->setText("Bluetooth Kapat");
-    } else {
-        qDebug() << "🔻 Bluetooth Kapatılıyor...";
-
-        command = "sudo rfkill block bluetooth";
-        process.start(command);
-        process.waitForFinished();
-        qDebug() << "rfkill block stdout: " << process.readAllStandardOutput();
-        qDebug() << "rfkill block stderr: " << process.readAllStandardError();
-
-        command = "bluetoothctl power off";
-        process.start(command);
-        process.waitForFinished();
-        qDebug() << "bluetoothctl power off stdout: " << process.readAllStandardOutput();
-        qDebug() << "bluetoothctl power off stderr: " << process.readAllStandardError();
-
-        command = "sudo hciconfig hci0 down";
-        process.start(command);
-        process.waitForFinished();
-        qDebug() << "hciconfig hci0 down stdout: " << process.readAllStandardOutput();
-        qDebug() << "hciconfig hci0 down stderr: " << process.readAllStandardError();
-
-        command = "sudo systemctl stop bluetooth.service";
-        process.start(command);
-        process.waitForFinished();
-        qDebug() << "systemctl stop stdout: " << process.readAllStandardOutput();
-        qDebug() << "systemctl stop stderr: " << process.readAllStandardError();
-
-        ui->btnBluetooth->setText("Bluetooth Aç");
-    }
-
-    isBluetoothOn = !isBluetoothOn;
-}
-
-void MainWindow::checkBluetoothStatus() {
-    QProcess process;
-    process.start("rfkill list bluetooth");
-    process.waitForFinished();
-    QString output = process.readAllStandardOutput();
-
-    if (output.contains("Soft blocked: no")) {
-        ui->btnBluetooth->setText("Bluetooth Kapat");
-    } else {
-        ui->btnBluetooth->setText("Bluetooth Aç");
+        showConnectionScreen();
     }
 }
 */
+
+
