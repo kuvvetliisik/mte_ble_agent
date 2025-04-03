@@ -22,6 +22,8 @@ public:
     void setScanButtonEnabled(bool enabled);
     void clearDeviceList();
     void setConnectionLabel(const QString &text);
+    void connectToDevice();
+    void disconnectDevice();
     static QString getBluetoothVersionFromHciconfig();
     ~ConnectionScreen();
 
@@ -30,22 +32,24 @@ signals:
     void deviceDisconnected();
     void dataReceivedFromDevice(const QString &message);
     void deviceNameReceived(const QString &deviceName);
+//    void bluetoothDisconnected();
 
 private slots:
     void updateBluetoothDevices();
-    void connectToDevice();
-    void disconnectDevice();
     void clearLog();
     //void handleDisconnected();
     //void emitDisconnectionSignal();
     //void resetUIAfterDisconnection();
-   // void terminateSocketConnection();
+    //void terminateSocketConnection();
     //void readSocketData();
     //void updateLiveRSSI();
     //void onSocketConnected();
     //void startLiveRSSIMonitor(const QString& mac, const QString& name, const QString& btver);
     double calculateDistance(int measuredPower, int rssi, double N = 2.0);
     double guessNFromRSSI(int rssi);
+    //void startRSSIMonitoring(const QString& macAddress);
+    //void refreshConnection();
+
 private:
     Ui::ConnectionScreen *ui;
     QBluetoothDeviceDiscoveryAgent *discoveryAgent;
@@ -64,8 +68,8 @@ private:
     //void setupSocketSignals(const QString &deviceName, const QString &macAddress, const QString &bluetoothVersion);
     //void updateUIOnConnectionSuccess(const QString &deviceName);
     //void sendDisconnectCommandToSystem(const QString &macAddress);
-
-
+    //QTimer *rssiMonitorTimer = nullptr;
+    //QProcess *rssiProcess = nullptr;
 
 };
 

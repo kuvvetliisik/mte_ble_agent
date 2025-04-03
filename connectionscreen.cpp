@@ -34,10 +34,12 @@ ConnectionScreen::ConnectionScreen(QWidget *parent) :
             deviceName = macAddress;
         }
 
-        if (rssi == 0) {
+        /*if (rssi == 0) {
             qDebug() << "⚠️ Geçersiz RSSI, cihaz atlandı:" << device.address().toString();
             return; //
-        }
+        }*/
+
+
 
         const auto deviceStr = QString("%1=%2").arg(deviceName).arg(macAddress);
 
@@ -79,7 +81,6 @@ ConnectionScreen::~ConnectionScreen() {
 }
 
 void ConnectionScreen::updateBluetoothDevices() {
-
 
     ui->comboBox->setUpdatesEnabled(false);
     ui->comboBox->clear();
@@ -149,9 +150,10 @@ void ConnectionScreen::connectToDevice() {
         double distance = calculateDistance(-59, rssi, estimatedN);
         qDebug() << "📏 Estimated distance: " << distance << " metre";
 
-        ui->txtLog->append("📡 RSSI: " + QString::number(rssi));
+        ui->txtLog->append("📡 RSSI: " + QString::number(rssi) + " dBm ");
+
         ui->txtLog->append("📏 Estimated distance: " + QString::number(distance, 'f', 2) + " m");
-        ui->txtLog->append("📏 Mesafe: " + QString::number(distance, 'f', 2) + " m");
+        //ui->txtLog->append("📏 Mesafe: " + QString::number(distance, 'f', 2) + " m");
         }
 
         else {
@@ -197,7 +199,6 @@ void ConnectionScreen::connectToDevice() {
     });
 */
 
-
     connect(socket, &QBluetoothSocket::connected, this, finalizeConnection);
     QTimer::singleShot(4000, this, finalizeConnection);
     connect(socket, &QBluetoothSocket::errorOccurred, this, [=](QBluetoothSocket::SocketError error) {
@@ -220,9 +221,7 @@ void ConnectionScreen::disconnectDevice() {
     ui->lblConnection->setText("⏳ Disconnecting...");
     ui->txtLog->append("Disconnecting from device...");
     qDebug() << "⚡ Emit çağrılıyor: devicedConnected";
-
    // emit deviceConnected(selectedDevice, macAddress, rssi, bluetoothVersion);
-
     if (socket->isOpen()) {
         qDebug() << "Disconnecting from Bluetooth service...";
         socket->disconnectFromService();
@@ -258,6 +257,8 @@ void ConnectionScreen::disconnectDevice() {
     ui->lblConnection->setText("❌ Disconnected");
     ui->txtLog->append("Bluetooth connection has been fully terminated.");
     ui->btnConnect->setEnabled(true);
+    qDebug() << "📤 emit bluetoothDisconnected() gönderiliyor!";
+    //emit bluetoothDisconnected();
 }
 double ConnectionScreen::calculateDistance(int measuredPower, int rssi, double N)
 {
@@ -278,3 +279,34 @@ double ConnectionScreen::guessNFromRSSI(int rssi) {
 void ConnectionScreen::clearLog() {
     ui->txtLog->clear();
 }
+
+/*void ConnectionScreen::refreshConnection() {
+    if (!socket || !socket->isOpen()) {
+        ui->txtLog->append("🔄 No active connection to refresh.");
+        return;
+    }
+
+    QString selectedDevice = ui->comboBox->currentText();
+    QString macAddress = devicess.value(selectedDevice);
+
+    if (macAddress.isEmpty()) {
+        ui->txtLog->append("⚠️ Could not retrieve MAC address for selected device.");
+        return;
+    }
+
+    ui->txtLog->append("🔄 Refreshing connection...");
+    ui->lblConnection->setText("🔄 Refreshing...");
+    ui->lblConnection->setStyleSheet("color: orange; font-weight: bold;");
+
+    // Bağlantı kesme
+    disconnectDevice();
+
+    // socket'in disconnected() sinyalini dinle
+    connect(socket, &QBluetoothSocket::disconnected, this, [=]() {
+        ui->txtLog->append("✅ Disconnected. Attempting to reconnect...");
+        connectToDevice();
+    });
+}
+
+*/
+
