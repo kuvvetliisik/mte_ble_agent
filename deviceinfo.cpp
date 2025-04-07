@@ -4,6 +4,9 @@
 DeviceInfo::DeviceInfo(QWidget *parent)
     : QWidget(parent), ui(new Ui::DeviceInfo) {
     ui->setupUi(this);
+    connect(ui->btnRefresh, &QPushButton::clicked, this, [=]() {
+        emit refreshConnectionRequested();
+    });
 }
 
 DeviceInfo::~DeviceInfo() {
@@ -12,11 +15,7 @@ DeviceInfo::~DeviceInfo() {
 
 void DeviceInfo::updateDeviceInfo(QString deviceName, QString macAddress, int rssi, QString bluetoothVersion) {
     qDebug() << "✅ updateDeviceInfo() CALLED";
-    /*qDebug() << "Device Name: " << deviceName;
-    qDebug() << "MAC Address: " << macAddress;
-    qDebug() << "RSSI: " << rssi;
-    qDebug() << "Bluetooth Level: " << bluetoothVersion;
-*/
+
     if (deviceName.isEmpty() || macAddress.isEmpty()) {
         qDebug() << "❌ ERROR: Device Info is EMPTY!";
         return;

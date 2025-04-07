@@ -17,6 +17,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->btnDeviceInfo, &QPushButton::clicked, this, &MainWindow::showDeviceInfo);
     //connect(connectionScreen, &ConnectionScreen::dataReceivedFromDevice, this, &MainWindow::handleDeviceData);
     //connect(deviceInfo->ui->btnRefresh, &QPushButton::clicked, this, &MainWindow::refreshConnectionFromDeviceInfo);
+    connect(deviceInfo, &DeviceInfo::refreshConnectionRequested, this, &MainWindow::refreshConnectionFromDeviceInfo);
+
 
 
     //connect(connectionScreen, &ConnectionScreen::deviceConnected, this, &MainWindow::handleDeviceConnected);
@@ -85,5 +87,42 @@ void MainWindow::handleDeviceConnected(QString deviceName, QString macAddress, i
     }
 }
 */
+
+void MainWindow::refreshConnectionFromDeviceInfo() {
+    qDebug() << "🔄 Refresh button clicked from DeviceInfo screen.";
+
+    QBluetoothSocket* socket = connectionScreen->socket;
+
+    if (socket && socket->isOpen()) {
+        qDebug() << "🔌 Socket is open. Disconnecting first...";
+
+        // Disconnected sinyali geldiğinde tekrar bağlan
+        QMetaObject::Connection handler;
+        handler = connect(socket, &QBluetoothSocket::disconnected, this, [=]() {
+            qDebug() << "✅ disconnected sinyali geldi, tekrar bağlanılıyor...";
+            QObject::disconnect(handler); // bir kez çalışsın
+            connectionScreen->connectToDevice();
+        });
+
+        // ZORUNLU: eğer sinyal gelmezse fallback olarak 3 saniye sonra bağlanmayı dene
+        QTimer::singleShot(3000, this, [=]() {
+            if (connectionScreen->socket == nullptr || !connectionScreen->socket->isOpen()) {
+                qDebug() << "⏱️ disconnected sinyali gelmedi, fallback olarak bağlanılıyor...";
+                connectionScreen->connectToDevice();
+            } else {
+                qDebug() << "⏱️ Hala bağlı, yeniden bağlantı yapılmayacak.";
+            }
+        });
+        connectionScreen->setConnectionLabelText("🔄 Refreshing connection...");
+
+        connectionScreen->disconnectDevice();
+    } else {
+        qDebug() << "ℹ️ No active socket. Connecting directly...";
+        connectionScreen->connectToDevice();
+    }
+}
+
+
+
 
 

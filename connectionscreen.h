@@ -8,6 +8,7 @@
 #include <QBluetoothServiceInfo>
 #include <QMap>
 #include <QTimer>
+#include <functional>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {class ConnectionScreen;}
@@ -24,7 +25,13 @@ public:
     void setConnectionLabel(const QString &text);
     void connectToDevice();
     void disconnectDevice();
+    void setConnectionLabelText(const QString& text, const QString& color = "orange");
+    void updateConnectionStatusLabel(bool connected);
+
+
+
     static QString getBluetoothVersionFromHciconfig();
+    QBluetoothSocket *socket;
     ~ConnectionScreen();
 
 signals:
@@ -37,24 +44,15 @@ signals:
 private slots:
     void updateBluetoothDevices();
     void clearLog();
-    //void handleDisconnected();
-    //void emitDisconnectionSignal();
-    //void resetUIAfterDisconnection();
-    //void terminateSocketConnection();
-    //void readSocketData();
-    //void updateLiveRSSI();
-    //void onSocketConnected();
-    //void startLiveRSSIMonitor(const QString& mac, const QString& name, const QString& btver);
     double calculateDistance(int measuredPower, int rssi, double N = 2.0);
     double guessNFromRSSI(int rssi);
     //void startRSSIMonitoring(const QString& macAddress);
     //void refreshConnection();
-
+    //void  refreshConnection();
 private:
     Ui::ConnectionScreen *ui;
     QBluetoothDeviceDiscoveryAgent *discoveryAgent;
     void discoverDeviceServices(const QBluetoothAddress &address);
-    QBluetoothSocket *socket;
     QMap<QString, QString> devicess;
     QMap<QString, int> rssiValues;
     QTimer *connectionCheckTimer;

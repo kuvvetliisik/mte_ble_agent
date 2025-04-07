@@ -25,7 +25,7 @@ private slots:
     //void handleDeviceData(const QString &message);
     //void handleDeviceName(const QString &deviceName);
     // void refreshConnectionFromDeviceInfo();
-
+    void refreshConnectionFromDeviceInfo();
 private:
     Ui::MainWindow *ui;
     DeviceInfo *deviceInfo;

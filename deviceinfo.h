@@ -17,6 +17,8 @@ public:
     ~DeviceInfo();
     void updateDeviceInfo(QString deviceName, QString macAddress, int rssi, QString bluetoothVersion);
 
+signals:
+        void refreshConnectionRequested();
 private:
      //Ui::DeviceInfo *ui;
 
