@@ -9,6 +9,7 @@
 #include <QMap>
 #include <QTimer>
 #include <functional>
+#include <QElapsedTimer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {class ConnectionScreen;}
@@ -26,20 +27,20 @@ public:
     void connectToDevice();
     void disconnectDevice();
     void setConnectionLabelText(const QString& text, const QString& color = "orange");
-    void updateConnectionStatusLabel(bool connected);
-
-
+    //void updateConnectionStatusLabel(bool connected);
 
     static QString getBluetoothVersionFromHciconfig();
     QBluetoothSocket *socket;
     ~ConnectionScreen();
 
 signals:
-    void deviceConnected(QString deviceName, QString macAddress, int rssi, QString bluetoothversion);
+    void deviceConnected(QString deviceName, QString macAddress, int rssi);
     void deviceDisconnected();
     void dataReceivedFromDevice(const QString &message);
     void deviceNameReceived(const QString &deviceName);
 //    void bluetoothDisconnected();
+    void connectionDurationUpdated(const QString &duration);
+
 
 private slots:
     void updateBluetoothDevices();
@@ -57,17 +58,12 @@ private:
     QMap<QString, int> rssiValues;
     QTimer *connectionCheckTimer;
     //QTimer* rssiMonitorTimer;
-    //QString currentConnectedMac;
-    //QString currentConnectedName;
-    //QString currentBluetoothVersion;
     bool isDisconnectedByUser;
     bool prepareForConnection(QString &macAddress, QString &deviceName);
-    //void initSocket(const QBluetoothAddress &bluetoothAddress, const QBluetoothUuid &uuid);
-    //void setupSocketSignals(const QString &deviceName, const QString &macAddress, const QString &bluetoothVersion);
-    //void updateUIOnConnectionSuccess(const QString &deviceName);
-    //void sendDisconnectCommandToSystem(const QString &macAddress);
     //QTimer *rssiMonitorTimer = nullptr;
     //QProcess *rssiProcess = nullptr;
+    QElapsedTimer connectionTimer;
+    QTimer *connectionDisplayTimer;
 
 };
 

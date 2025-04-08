@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include "connectionscreen.h"
 #include "deviceinfo.h"
+#include "filetransfer.h"
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -19,17 +21,19 @@ public:
 private slots:
     void showDeviceInfo();
     void showConnectionScreen();
-    //void toggleBluetooth();
-    //void checkBluetoothStatus();
-    void handleDeviceConnected(QString deviceName, QString macAddress, int rssi, QString bluetoothversion);
+    void handleDeviceConnected(QString deviceName, QString macAddress, int rssi);
     //void handleDeviceData(const QString &message);
     //void handleDeviceName(const QString &deviceName);
     // void refreshConnectionFromDeviceInfo();
     void refreshConnectionFromDeviceInfo();
+    //void setDeviceInfoConnectionStatus(bool connected);
+    void showFileTransfer();
+
 private:
     Ui::MainWindow *ui;
     DeviceInfo *deviceInfo;
     ConnectionScreen *connectionScreen;
+    FileTransfer *fileTransfer;
 };
 
 #endif

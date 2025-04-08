@@ -115,7 +115,7 @@ QWidget#page_cihaz {
      <widget class="QWidget" name="page_3">
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="5" column="0">
-        <widget class="QLabel" name="lblBluetoothVersion">
+        <widget class="QLabel" name="lblDuration">
          <property name="styleSheet">
           <string notr="true">QLabel {
     font-size: 14px;
@@ -125,7 +125,7 @@ QWidget#page_cihaz {
 </string>
          </property>
          <property name="text">
-          <string>Bluetooth Level :</string>
+          <string>Connection Time:</string>
          </property>
         </widget>
        </item>

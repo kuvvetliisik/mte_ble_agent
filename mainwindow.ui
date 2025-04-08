@@ -62,9 +62,10 @@ QPushButton:pressed {
        <string notr="true"/>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="connectionScreen"/>
+      <widget class="QWidget" name="fileTransfer"/>
       <widget class="QWidget" name="deviceInfo"/>
      </widget>
     </item>

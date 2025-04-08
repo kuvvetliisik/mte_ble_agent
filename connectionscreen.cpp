@@ -32,6 +32,101 @@ ConnectionScreen::ConnectionScreen(QWidget *parent) :
         int rssi = device.rssi();
         qDebug() << "📶 Cihaz RSSI:" << rssi;
 
+        quint8 major = device.majorDeviceClass();
+        quint8 minor = device.minorDeviceClass();
+
+
+        qDebug() << "📦 Major Device Class:" << major;
+        qDebug() << "🔸 Minor Device Class:" << minor;
+
+        QString majorStr;
+        switch (major) {
+        case QBluetoothDeviceInfo::ComputerDevice:
+            majorStr = "Bilgisayar"; break;
+        case QBluetoothDeviceInfo::PhoneDevice:
+            majorStr = "Telefon"; break;
+        case QBluetoothDeviceInfo::AudioVideoDevice:
+            majorStr = "Ses / Video"; break;
+        case QBluetoothDeviceInfo::PeripheralDevice:
+            majorStr = "Çevre Birimi (Klavye, Mouse vs.)"; break;
+        case QBluetoothDeviceInfo::HealthDevice:
+            majorStr = "Sağlık Cihazı"; break;
+        default:
+            majorStr = "Bilinmeyen / Uncategorized";
+        }
+
+        qDebug() << "🧠 Cihaz Türü Yorumlanmış:" << majorStr;
+
+        QString minorStr;
+        if (major == QBluetoothDeviceInfo::PhoneDevice) {
+            switch (minor) {
+            case 0:
+                minorStr = "Sınıflandırılmamış Telefon";
+                break;
+            case 1:
+                minorStr = "Cep Telefonu (Cellular)";
+                break;
+            case 2:
+                minorStr = "Kablosuz Telefon (Cordless)";
+                break;
+            case 3:
+                minorStr = "Smartphone";
+                break;
+            case 4:
+                minorStr = "Modem / Ses Geçidi";
+                break;
+            case 5:
+                minorStr = "ISDN Erişimi";
+                break;
+            default:
+                minorStr = "Bilinmeyen Alt Tür";
+            }
+        } else {
+            minorStr = "Bu major class için minor yorumlanmadı";
+        }
+
+        qDebug() << "🧩 Cihaz Alt Türü (Minor):" << minorStr;
+
+        if (major == QBluetoothDeviceInfo::ComputerDevice) {
+            switch (minor) {
+            case 0:
+                minorStr = "Sınıflandırılmamış Bilgisayar";
+                break;
+            case 1:
+                minorStr = "Masaüstü Bilgisayar";
+                break;
+            case 2:
+                minorStr = "Sunucu Bilgisayar";
+                break;
+            case 3:
+                minorStr = "Dizüstü Bilgisayar (Laptop)";
+                break;
+            case 4:
+                minorStr = "Elde Taşınabilir PC / PDA";
+                break;
+            case 5:
+                minorStr = "Avuç içi PC (Palm)";
+                break;
+            case 6:
+                minorStr = "Giyilebilir Bilgisayar";
+                break;
+            case 7:
+                minorStr = "Tablet";
+                break;
+            default:
+                minorStr = "Bilinmeyen Bilgisayar Alt Türü";
+            }
+        }
+
+        if (major == QBluetoothDeviceInfo::PhoneDevice) {
+            // Telefon minor yorumları
+        } else if (major == QBluetoothDeviceInfo::ComputerDevice) {
+            // Yukarıdaki bilgisayar minor yorumları
+        } else {
+            minorStr = "Bu major class için minor yorumlanmadı";
+        }
+
+
         if (deviceName.isEmpty()) {
             deviceName = macAddress;
         }
@@ -41,9 +136,15 @@ ConnectionScreen::ConnectionScreen(QWidget *parent) :
             return; //
         }*/
 
+        QString icon;
+        if (major == QBluetoothDeviceInfo::PhoneDevice) icon = "📱 ";
+        else if (major == QBluetoothDeviceInfo::ComputerDevice) icon = "💻 ";
+        else if (major == QBluetoothDeviceInfo::AudioVideoDevice) icon = "🎧 ";
+        else if (major == QBluetoothDeviceInfo::PeripheralDevice) icon = "🖱️ ";
+        else icon = "📦 ";
 
-
-        const auto deviceStr = QString("%1=%2").arg(deviceName).arg(macAddress);
+        QString deviceStr = QString("%1: %2 = %3").arg(icon, deviceName, macAddress);
+        //const auto deviceStr = QString("%1=%2").arg(deviceName).arg(macAddress);
 
         qDebug() << "Found Device:" << deviceName << "| MAC:" << macAddress;
 
@@ -64,6 +165,7 @@ ConnectionScreen::ConnectionScreen(QWidget *parent) :
     connectionCheckTimer->start(3000);
 
     QListView *comboListView = new QListView(ui->comboBox);
+    QApplication::setStyle("Windows");
     comboListView->setMaximumHeight(500);
     comboListView->setFixedWidth(280);
     comboListView->setStyleSheet(
@@ -76,6 +178,24 @@ ConnectionScreen::ConnectionScreen(QWidget *parent) :
         "}"
         );
     ui->comboBox->setView(comboListView);
+
+    connectionDisplayTimer = new QTimer(this);
+    connectionDisplayTimer->setInterval(1000); // her saniye çalışır
+
+    connect(connectionDisplayTimer, &QTimer::timeout, this, [=]() {
+        if (socket && socket->isOpen() && connectionTimer.isValid()) {
+            qint64 elapsedMs = connectionTimer.elapsed();
+            int seconds = elapsedMs / 1000;
+            int minutes = seconds / 60;
+            seconds %= 60;
+
+            QString durationStr = QString("⏱️ %1:%2")
+                                      .arg(minutes, 2, 10, QLatin1Char('0'))
+                                      .arg(seconds, 2, 10, QLatin1Char('0'));
+
+            emit connectionDurationUpdated(durationStr);  // 💡 DeviceInfo'a sinyal gönder
+        }
+    });
 }
 
 ConnectionScreen::~ConnectionScreen() {
@@ -100,7 +220,6 @@ void ConnectionScreen::updateBluetoothDevices() {
 
 void ConnectionScreen::connectToDevice() {
     QString selectedDevice = ui->comboBox->currentText();
-    QString bluetoothVersion = "Unknown";
     bool connectedSuccessfully = false;
 
 
@@ -139,10 +258,10 @@ void ConnectionScreen::connectToDevice() {
 
     socket->connectToService(bluetoothAddress, serviceUuid);
     qDebug()<< "connecttoservice çağrıldı";
-    auto finalizeConnection = [=]() {
+    auto finalizeConnection = [this, selectedDevice, macAddress]() {
         if (socket && socket->isOpen()) {
             qDebug() << "✅ Bağlantı başarılı, emit deviceConnected";
-            emit deviceConnected(selectedDevice, macAddress, rssiValues.value(macAddress, -99), bluetoothVersion);
+            emit deviceConnected(selectedDevice, macAddress, rssiValues.value(macAddress, -99));
             ui->lblConnection->setText("✅ Connected: " + selectedDevice);
             ui->lblConnection->setStyleSheet("color: green; font-weight: bold; font-size: 18px;");
             ui->txtLog->append("✅ Connected to device: " + selectedDevice);
@@ -156,7 +275,12 @@ void ConnectionScreen::connectToDevice() {
 
         ui->txtLog->append("📏 Estimated distance: " + QString::number(distance, 'f', 2) + " m");
         //ui->txtLog->append("📏 Mesafe: " + QString::number(distance, 'f', 2) + " m");
-        updateConnectionStatusLabel(true);
+        //updateConnectionStatusLabel(true);
+        connectionTimer.start();// Bağlantı süresi ölçümü başlar
+        connectionDisplayTimer->start();
+        ui->txtLog->append("⏱️ Bağlantı süresi sayacı başlatıldı.");
+
+
         }
 
         else {
@@ -224,7 +348,6 @@ void ConnectionScreen::disconnectDevice() {
     ui->lblConnection->setText("⏳ Disconnecting...");
     ui->txtLog->append("Disconnecting from device...");
     qDebug() << "⚡ Emit çağrılıyor: devicedConnected";
-   // emit deviceConnected(selectedDevice, macAddress, rssi, bluetoothVersion);
     if (socket->isOpen()) {
         qDebug() << "Disconnecting from Bluetooth service...";
         socket->disconnectFromService();
@@ -251,6 +374,20 @@ void ConnectionScreen::disconnectDevice() {
         });
         process->start("bluetoothctl", QStringList() << "disconnect" << macAddress);
     }
+    if (connectionTimer.isValid()) {
+        qint64 elapsedMs = connectionTimer.elapsed();  // milisaniye cinsinden geçen süre
+        int seconds = elapsedMs / 1000;
+        int minutes = seconds / 60;
+        seconds %= 60;
+
+        QString durationText = QString("⏱️ Bağlantı süresi: %1 dakika %2 saniye")
+                                   .arg(minutes).arg(seconds);
+        ui->txtLog->append(durationText);
+        qDebug() << durationText;
+    }
+
+    // disconnectDevice() veya timer içinde
+
 
     if (socket) {
         delete socket;
@@ -260,10 +397,9 @@ void ConnectionScreen::disconnectDevice() {
     ui->lblConnection->setText("❌ Disconnected");
     ui->txtLog->append("Bluetooth connection has been fully terminated.");
     ui->btnConnect->setEnabled(true);
-    updateConnectionStatusLabel(false);
+    connectionDisplayTimer->stop();
+    emit connectionDurationUpdated("⏱️ --:--");  // Optional: DeviceInfo’da sıfırlamak için
 
-    //qDebug() << "📤 emit bluetoothDisconnected() gönderiliyor!";
-    //emit bluetoothDisconnected();
 }
 double ConnectionScreen::calculateDistance(int measuredPower, int rssi, double N)
 {
@@ -289,16 +425,6 @@ void ConnectionScreen::setConnectionLabelText(const QString& text, const QString
     ui->lblConnection->setText(text);
     ui->lblConnection->setStyleSheet("color: " + color + "; font-weight: bold;");
 }
-void ConnectionScreen::updateConnectionStatusLabel(bool connected) {
-    if (connected) {
-        ui->lblConnection->setText("✅ Connected");
-        ui->lblConnection->setStyleSheet("color: green; font-weight: bold;");
-    } else {
-        ui->lblConnection->setText("🔴 Not Connected");
-        ui->lblConnection->setStyleSheet("color: red; font-weight: bold;");
-    }
-}
-
 
 
 
