@@ -25,6 +25,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         deviceinfo.h deviceinfo.cpp deviceinfo.ui
         connectionscreen.h connectionscreen.cpp connectionscreen.ui
+        filetransfer.h filetransfer.cpp filetransfer.ui
 
 
 
