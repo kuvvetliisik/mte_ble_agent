@@ -61,7 +61,6 @@ void MainWindow::handleDeviceConnected(QString deviceName, QString macAddress, i
    // showDeviceInfo();
 }
 
-
 void MainWindow::refreshConnectionFromDeviceInfo() {
     qDebug() << "🔄 Refresh button clicked from DeviceInfo screen.";
 

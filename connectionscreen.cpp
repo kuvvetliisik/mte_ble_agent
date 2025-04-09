@@ -16,6 +16,7 @@ ConnectionScreen::ConnectionScreen(QWidget *parent) :
     connectionCheckTimer(new QTimer(this))
 {
     ui->setupUi(this);
+    logger = new LogManager(this);
 
     ui->lblConnection->setText("🔴 Not Connected");
 
@@ -193,7 +194,7 @@ ConnectionScreen::ConnectionScreen(QWidget *parent) :
                                       .arg(minutes, 2, 10, QLatin1Char('0'))
                                       .arg(seconds, 2, 10, QLatin1Char('0'));
 
-            emit connectionDurationUpdated(durationStr);  // 💡 DeviceInfo'a sinyal gönder
+            emit connectionDurationUpdated(durationStr);
         }
     });
 }
@@ -258,10 +259,11 @@ void ConnectionScreen::connectToDevice() {
 
     socket->connectToService(bluetoothAddress, serviceUuid);
     qDebug()<< "connecttoservice çağrıldı";
-    auto finalizeConnection = [this, selectedDevice, macAddress]() {
+    auto finalizeConnection = [this, selectedDevice, macAddress,rssi]() {
         if (socket && socket->isOpen()) {
             qDebug() << "✅ Bağlantı başarılı, emit deviceConnected";
             emit deviceConnected(selectedDevice, macAddress, rssiValues.value(macAddress, -99));
+            logger->logConnectionStatus(selectedDevice, macAddress, true, rssi);
             ui->lblConnection->setText("✅ Connected: " + selectedDevice);
             ui->lblConnection->setStyleSheet("color: green; font-weight: bold; font-size: 18px;");
             ui->txtLog->append("✅ Connected to device: " + selectedDevice);
@@ -288,6 +290,7 @@ void ConnectionScreen::connectToDevice() {
         }
 
     };
+
 
 //Timerın eklenme sebebi signal slotun yakalanmamasından dolayı eklenmiştir.
    /* QTimer::singleShot(4000, this, [=]() {
@@ -379,18 +382,25 @@ void ConnectionScreen::disconnectDevice() {
         int seconds = elapsedMs / 1000;
         int minutes = seconds / 60;
         seconds %= 60;
+        QString durationStr = QString("%1:%2")
+                                  .arg(minutes, 2, 10, QChar('0'))
+                                  .arg(seconds, 2, 10, QChar('0'));
 
+        logger->logConnectionStatus(
+            ui->comboBox->currentText(), // cihaz adı
+            devicess[ui->comboBox->currentText()], // mac
+            false, // disconnected
+            rssiValues.value(devicess[ui->comboBox->currentText()], -99),
+            durationStr);
         QString durationText = QString("⏱️ Bağlantı süresi: %1 dakika %2 saniye")
                                    .arg(minutes).arg(seconds);
         ui->txtLog->append(durationText);
         qDebug() << durationText;
     }
 
-    // disconnectDevice() veya timer içinde
-
 
     if (socket) {
-        delete socket;
+        socket->deleteLater();
         socket = nullptr;
     }
 

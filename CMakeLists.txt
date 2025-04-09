@@ -26,6 +26,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         deviceinfo.h deviceinfo.cpp deviceinfo.ui
         connectionscreen.h connectionscreen.cpp connectionscreen.ui
         filetransfer.h filetransfer.cpp filetransfer.ui
+        logmanager.h logmanager.cpp
 
 
 

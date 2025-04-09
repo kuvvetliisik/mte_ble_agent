@@ -10,6 +10,8 @@
 #include <QTimer>
 #include <functional>
 #include <QElapsedTimer>
+#include "logmanager.h"
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui {class ConnectionScreen;}
@@ -64,6 +66,8 @@ private:
     //QProcess *rssiProcess = nullptr;
     QElapsedTimer connectionTimer;
     QTimer *connectionDisplayTimer;
+    LogManager *logger;
+
 
 };
 
