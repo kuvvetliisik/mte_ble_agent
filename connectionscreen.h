@@ -11,6 +11,7 @@
 #include <functional>
 #include <QElapsedTimer>
 #include "logmanager.h"
+#include "QBluetoothServer"
 
 
 QT_BEGIN_NAMESPACE
@@ -29,10 +30,13 @@ public:
     void connectToDevice();
     void disconnectDevice();
     void setConnectionLabelText(const QString& text, const QString& color = "orange");
-    //void updateConnectionStatusLabel(bool connected);
+    void clientConnected();
+    void onRemoteDisconnected();
+    void onSocketStateChanged(QBluetoothSocket::SocketState state);
 
     static QString getBluetoothVersionFromHciconfig();
     QBluetoothSocket *socket;
+
     ~ConnectionScreen();
 
 signals:
@@ -40,7 +44,6 @@ signals:
     void deviceDisconnected();
     void dataReceivedFromDevice(const QString &message);
     void deviceNameReceived(const QString &deviceName);
-//    void bluetoothDisconnected();
     void connectionDurationUpdated(const QString &duration);
 
 
@@ -49,9 +52,11 @@ private slots:
     void clearLog();
     double calculateDistance(int measuredPower, int rssi, double N = 2.0);
     double guessNFromRSSI(int rssi);
-    //void startRSSIMonitoring(const QString& macAddress);
-    //void refreshConnection();
-    //void  refreshConnection();
+    //void handleDisconnection();
+public slots:
+    void updateConnectionLabel(const QString& text, const QString& color);
+    void appendToLog(const QString& message);
+
 private:
     Ui::ConnectionScreen *ui;
     QBluetoothDeviceDiscoveryAgent *discoveryAgent;
@@ -62,11 +67,12 @@ private:
     //QTimer* rssiMonitorTimer;
     bool isDisconnectedByUser;
     bool prepareForConnection(QString &macAddress, QString &deviceName);
-    //QTimer *rssiMonitorTimer = nullptr;
-    //QProcess *rssiProcess = nullptr;
     QElapsedTimer connectionTimer;
     QTimer *connectionDisplayTimer;
     LogManager *logger;
+    QBluetoothServiceInfo serviceInfo;
+    QBluetoothServer *rfcommServer;
+    bool disconnectInitiatedByUs = false;
 
 
 };

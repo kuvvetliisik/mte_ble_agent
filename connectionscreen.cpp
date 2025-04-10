@@ -7,6 +7,11 @@
 #include <QEventLoop>
 #include <QProcess>
 #include <QListView>
+#include <QAbstractSocket>
+#include <QBluetoothServer>
+#include <QBluetoothServiceInfo>
+#include <QBluetoothLocalDevice>
+
 
 ConnectionScreen::ConnectionScreen(QWidget *parent) :
     QWidget(parent),
@@ -25,7 +30,6 @@ ConnectionScreen::ConnectionScreen(QWidget *parent) :
     connect(ui->btnDisconnect, &QPushButton::clicked, this, &ConnectionScreen::disconnectDevice);
     connect(ui->btnClear, &QPushButton::clicked, this, &ConnectionScreen::clearLog);
     //connect(ui->btnRefresh, &QPushButton::clicked, this, &ConnectionScreen::refreshConnection);
-
 
     connect(discoveryAgent, &QBluetoothDeviceDiscoveryAgent::deviceDiscovered, this, [this](const QBluetoothDeviceInfo &device) {
         QString deviceName = device.name().trimmed();
@@ -120,13 +124,10 @@ ConnectionScreen::ConnectionScreen(QWidget *parent) :
         }
 
         if (major == QBluetoothDeviceInfo::PhoneDevice) {
-            // Telefon minor yorumları
         } else if (major == QBluetoothDeviceInfo::ComputerDevice) {
-            // Yukarıdaki bilgisayar minor yorumları
         } else {
             minorStr = "Bu major class için minor yorumlanmadı";
         }
-
 
         if (deviceName.isEmpty()) {
             deviceName = macAddress;
@@ -164,6 +165,49 @@ ConnectionScreen::ConnectionScreen(QWidget *parent) :
             qDebug() << "Socket is open : " << socket->isOpen();
     });
     connectionCheckTimer->start(3000);
+  /*  connect(connectionCheckTimer, &QTimer::timeout, this, [=]() {
+        qDebug() << "🕒 [TIMER] Tick";
+
+        if (!socket) {
+            qDebug() << "⚠️ [TIMER] socket null, kontrol yok.";
+            return;
+        }
+
+        auto currentState = socket->state();
+        bool isOpen = socket->isOpen();
+
+        qDebug() << "🔍 [TIMER] socket->isOpen():" << isOpen;
+        qDebug() << "🔍 [TIMER] socket->state():" << currentState;
+
+        if (!isOpen || currentState != QBluetoothSocket::SocketState::ConnectedState) {
+
+            qDebug() << "🚫 [TIMER] Bağlantı henüz oturmamış. Ping atılmıyor.";
+            return;
+        }
+
+        QByteArray testData = "ping";
+        socket->write(testData);
+        bool success = socket->waitForBytesWritten(1000);
+
+        if (!success) {
+            qDebug() << "🧨 Ping başarısız → bağlantı kopmuş olabilir!";
+            ui->lblConnection->setText("🔴 Disconnected (Ping Timeout)");
+            ui->lblConnection->setStyleSheet("color: red; font-weight: bold;");
+            ui->txtLog->append("🛑 Timer: ping başarısız, bağlantı kopmuş olabilir.");
+
+            emit connectionDurationUpdated("⏱️ --:--");
+            connectionDisplayTimer->stop();
+
+            socket->deleteLater();
+            socket = nullptr;
+
+            ui->btnConnect->setEnabled(true);
+        } else {
+            qDebug() << "📤 Ping başarılı.";
+        }
+    });
+
+    connectionCheckTimer->start(3000);*/
 
     QListView *comboListView = new QListView(ui->comboBox);
     QApplication::setStyle("Windows");
@@ -197,6 +241,35 @@ ConnectionScreen::ConnectionScreen(QWidget *parent) :
             emit connectionDurationUpdated(durationStr);
         }
     });
+    // Bluetooth Server Başlat
+    rfcommServer = new QBluetoothServer(QBluetoothServiceInfo::RfcommProtocol, this);
+    connect(rfcommServer, &QBluetoothServer::newConnection, this, &ConnectionScreen::clientConnected);
+    qDebug() << "📱 Yeni bir uzak bağlantı algılandı!";
+    this->clientConnected();
+
+    QBluetoothAddress adapterAddress = QBluetoothLocalDevice().address();
+    qDebug() << "Adapter address:" << adapterAddress.toString();
+
+    bool success = rfcommServer->listen(adapterAddress);
+    qDebug() << (success ? "✅ Dinleme başladı" : "❌ Dinleme BAŞARISIZ");
+
+    QBluetoothUuid fixedUuid("00001101-0000-1000-8000-00805F9B34FB");
+
+    QBluetoothServiceInfo::Sequence classId;
+    classId << QVariant::fromValue(fixedUuid);
+    serviceInfo.setAttribute(QBluetoothServiceInfo::ServiceClassIds, classId);
+    serviceInfo.setAttribute(QBluetoothServiceInfo::ServiceName, "MyBluetoothServer");
+    serviceInfo.setServiceUuid(fixedUuid);
+    serviceInfo.setDevice(QBluetoothDeviceInfo(QBluetoothLocalDevice().address(), "LocalDevice", 0));
+
+    // 🔥 UUID çakışmalarını engelle
+    if (serviceInfo.isRegistered()) {
+        serviceInfo.unregisterService();
+    }
+    serviceInfo.registerService(adapterAddress);
+
+
+
 }
 
 ConnectionScreen::~ConnectionScreen() {
@@ -247,6 +320,10 @@ void ConnectionScreen::connectToDevice() {
     }
 
     socket = new QBluetoothSocket(QBluetoothServiceInfo::RfcommProtocol, this);
+    //connect(socket, &QBluetoothSocket::disconnected, this, &ConnectionScreen::handleDisconnection);
+    connect(socket, &QBluetoothSocket::disconnected, this, &ConnectionScreen::onRemoteDisconnected);
+    connect(socket, &QBluetoothSocket::stateChanged, this, &ConnectionScreen::onSocketStateChanged);
+
 
     ui->lblConnection->setText("⏳ Connecting...");
     ui->lblConnection->setStyleSheet("color: yellow; font-weight: bold;");
@@ -282,7 +359,6 @@ void ConnectionScreen::connectToDevice() {
         connectionDisplayTimer->start();
         ui->txtLog->append("⏱️ Bağlantı süresi sayacı başlatıldı.");
 
-
         }
 
         else {
@@ -312,7 +388,7 @@ void ConnectionScreen::connectToDevice() {
         /*int rssi = -99;
         if (rssiValues.contains(macAddress)) {
             rssi = rssiValues[macAddress];
-        }
+        }connect(socket, &QBluetoothSocket::connected, this, finalizeConnection);
         qDebug() << "⚡ Emit çağrılıyor: deviceConnected";
 
     emit deviceConnected(selectedDevice, macAddress, rssi, bluetoothVersion);
@@ -324,7 +400,7 @@ void ConnectionScreen::connectToDevice() {
             qDebug() << "🔹 [TEST] Socket is still open, ensuring connection label update!";
             ui->lblConnection->setText("✅ Connected: " + selectedDevice);
             ui->lblConnection->setStyleSheet("color: green; font-weight: bold; font-size: 18px;");
-        }
+        }connect(socket, &QBluetoothSocket::connected, this, finalizeConnection);
 
     });
 */
@@ -337,11 +413,17 @@ void ConnectionScreen::connectToDevice() {
         ui->txtLog->append("⚠️ Connection Error: " + socket->errorString());
         qDebug() << "⚠️ Error Code: " << error;
         qDebug() << "⚠️ Connection Error: " << socket->errorString();
-
+       /* if (error == QBluetoothSocket::RemoteHostClosedError ||
+            error == QBluetoothSocket::NetworkError ||
+            error == QBluetoothSocket::OperationError) {
+            // Bu hatalar bağlantının koptuğunu gösterebilir
+            handleDisconnection();
+        }*/
     });
 }
 
 void ConnectionScreen::disconnectDevice() {
+      disconnectInitiatedByUs = true;
     if (!socket || !socket->isOpen()) {
         ui->txtLog->append("⚠️ No active connection.");
         ui->lblConnection->setText("🔴 Not Connected");
@@ -378,7 +460,7 @@ void ConnectionScreen::disconnectDevice() {
         process->start("bluetoothctl", QStringList() << "disconnect" << macAddress);
     }
     if (connectionTimer.isValid()) {
-        qint64 elapsedMs = connectionTimer.elapsed();  // milisaniye cinsinden geçen süre
+        qint64 elapsedMs = connectionTimer.elapsed();
         int seconds = elapsedMs / 1000;
         int minutes = seconds / 60;
         seconds %= 60;
@@ -387,9 +469,9 @@ void ConnectionScreen::disconnectDevice() {
                                   .arg(seconds, 2, 10, QChar('0'));
 
         logger->logConnectionStatus(
-            ui->comboBox->currentText(), // cihaz adı
-            devicess[ui->comboBox->currentText()], // mac
-            false, // disconnected
+            ui->comboBox->currentText(),
+            devicess[ui->comboBox->currentText()],
+            false,
             rssiValues.value(devicess[ui->comboBox->currentText()], -99),
             durationStr);
         QString durationText = QString("⏱️ Bağlantı süresi: %1 dakika %2 saniye")
@@ -408,7 +490,7 @@ void ConnectionScreen::disconnectDevice() {
     ui->txtLog->append("Bluetooth connection has been fully terminated.");
     ui->btnConnect->setEnabled(true);
     connectionDisplayTimer->stop();
-    emit connectionDurationUpdated("⏱️ --:--");  // Optional: DeviceInfo’da sıfırlamak için
+    emit connectionDurationUpdated("⏱️ --:--");
 
 }
 double ConnectionScreen::calculateDistance(int measuredPower, int rssi, double N)
@@ -436,5 +518,200 @@ void ConnectionScreen::setConnectionLabelText(const QString& text, const QString
     ui->lblConnection->setStyleSheet("color: " + color + "; font-weight: bold;");
 }
 
+/*void ConnectionScreen::handleDisconnection()
+{
+    if (!socket) return;
 
+    qDebug() << "🔌 Connection lost, reason:" << socket->errorString();
+    if (connectionTimer.isValid()) {
+        qint64 elapsedMs = connectionTimer.elapsed();
+        int seconds = elapsedMs / 1000;
+        int minutes = seconds / 60;
+        seconds %= 60;
+        QString durationStr = QString("%1:%2")
+                                  .arg(minutes, 2, 10, QChar('0'))
+                                  .arg(seconds, 2, 10, QChar('0'));
 
+        QString deviceName = ui->comboBox->currentText();
+        QString macAddress = devicess.value(deviceName, "unknown");
+
+        logger->logConnectionStatus(
+            deviceName,
+            macAddress,
+            false,
+            rssiValues.value(macAddress, -99),
+            durationStr);
+
+        QString durationText = QString("⏱️ Connection duration: %1 minutes %2 seconds")
+                                   .arg(minutes).arg(seconds);
+        ui->txtLog->append(durationText);
+        ui->txtLog->append("❌ Connection lost: " + socket->errorString());
+    }
+
+    ui->lblConnection->setText("❌ Disconnected");
+    ui->lblConnection->setStyleSheet("color: red; font-weight: bold;");
+    ui->btnConnect->setEnabled(true);
+
+    connectionDisplayTimer->stop();
+    emit connectionDurationUpdated("⏱️ --:--");
+
+    socket->deleteLater();
+    socket = nullptr;
+}
+*/
+void ConnectionScreen::clientConnected()
+{
+    qDebug() << "📡 clientConnected() çağrıldı!";
+
+    // Mevcut socket temizle
+    if (socket) {
+        disconnect(socket, nullptr, this, nullptr);
+        socket->deleteLater();
+        socket = nullptr;
+    }
+
+    // Yeni bağlantıyı al
+    socket = rfcommServer->nextPendingConnection();
+
+    if (!socket) {
+        qDebug() << "❌ Bağlantı alınamadı!";
+        return;
+    }
+    QMetaObject::invokeMethod(this, [this]() {
+        ui->lblConnection->setText("✅ Connected (Remote)");
+        ui->lblConnection->setStyleSheet("color: green; font-weight: bold;");
+        ui->txtLog->append("✅ Uzak cihaz bağlandı!");
+});
+
+    // Debug bilgisi
+    QBluetoothAddress remoteAddress = socket->peerAddress();
+    QString macAddress = remoteAddress.toString();
+    QString deviceName = "Uzak Cihaz (" + macAddress + ")";
+
+    qDebug() << "✅ Uzak cihaz bağlandı: " << macAddress;
+
+    // UI güncellemesi için direkt fonksiyon çağrısı yap
+    updateConnectionLabel("✅ Connected: " + deviceName, "green");
+    appendToLog("✅ Uzak cihazdan gelen bağlantı kabul edildi!");
+
+    // Bağlantı süresini başlat
+    connectionTimer.start();
+    connectionDisplayTimer->start();
+
+    // Sinyalleri bağla
+    connect(socket, &QBluetoothSocket::disconnected, this, &ConnectionScreen::onRemoteDisconnected);
+    connect(socket, &QBluetoothSocket::stateChanged, this, &ConnectionScreen::onSocketStateChanged);
+
+    // Veri geldiğinde işle
+    connect(socket, &QBluetoothSocket::readyRead, this, [this]() {
+        QByteArray data = socket->readAll();
+        qDebug() << "📥 Veri alındı:" << data;
+        appendToLog("📥 Uzak cihazdan veri alındı: " + QString(data));
+    });
+
+    // Cihaz bağlantı sinyalini gönder
+    emit deviceConnected(deviceName, macAddress, -99);
+}
+void ConnectionScreen::onRemoteDisconnected()
+{
+    qDebug() << "🔌 onRemoteDisconnected() çağrıldı!";
+
+    // Bağlantı süresi hesapla
+    QString durationStr = "--:--";
+    if (connectionTimer.isValid()) {
+        qint64 elapsedMs = connectionTimer.elapsed();
+        int seconds = elapsedMs / 1000;
+        int minutes = seconds / 60;
+        seconds %= 60;
+        durationStr = QString("%1:%2")
+                          .arg(minutes, 2, 10, QChar('0'))
+                          .arg(seconds, 2, 10, QChar('0'));
+
+        QString durationText = QString("⏱️ Bağlantı süresi: %1 dakika %2 saniye")
+                                   .arg(minutes).arg(seconds);
+        qDebug() << durationText;
+        appendToLog(durationText);
+    }
+
+    // Soketi kontrol et ve log kaydet
+    if (socket) {
+        QString deviceName = "Uzak Cihaz";
+        QString macAddress = socket->peerAddress().toString();
+        logger->logConnectionStatus(deviceName, macAddress, false, -99, durationStr);
+    }
+    if (disconnectInitiatedByUs) {
+        qDebug() << "ℹ️ Bağlantı bizim tarafımızdan sonlandırılmış. Remote disconnect değil.";
+        disconnectInitiatedByUs = false; // ✅ Resetle
+        return;
+    }
+    // UI güncelle
+    updateConnectionLabel("🔴 Disconnected (Remote)", "red");
+    appendToLog("🔌 Uzak cihaz bağlantıyı kesti.");
+    ui->btnConnect->setEnabled(true);
+
+    QMetaObject::invokeMethod(this, [this]() {
+        ui->lblConnection->setText("🔴 Disconnected (Remote)");
+        ui->lblConnection->setStyleSheet("color: red; font-weight: bold;");
+        ui->txtLog->append("🔌 Uzak cihaz bağlantıyı kesti!");
+    });
+
+    // Timer'ı durdur
+    connectionDisplayTimer->stop();
+    emit connectionDurationUpdated("⏱️ --:--");
+
+    // Socket temizle
+    if (socket) {
+        socket->close();
+        socket->deleteLater();
+        socket = nullptr;
+    }
+}
+void ConnectionScreen::onSocketStateChanged(QBluetoothSocket::SocketState state)
+{
+    qDebug() << "🔄 Socket durumu değişti: " << state;
+
+    switch (state) {
+    case QBluetoothSocket::SocketState::ConnectedState:
+        qDebug() << "🔗 Socket bağlı durumda.";
+        break;
+
+    case QBluetoothSocket::SocketState::UnconnectedState:
+        qDebug() << "🔌 Socket bağlantısı kesildi.";
+
+        // UI güncelle - ancak onRemoteDisconnected() zaten çağrılmış olabilir
+        if (socket) { // Hala socket varsa UI güncelle
+            QMetaObject::invokeMethod(this, [this](){
+                ui->lblConnection->setText("🔴 Disconnected (stateChanged)");
+                ui->lblConnection->setStyleSheet("color: red; font-weight: bold;");
+                ui->txtLog->append("🔌 Bağlantı kesildi (durum değişikliği ile).");
+                ui->btnConnect->setEnabled(true);
+            }, Qt::QueuedConnection);
+
+            connectionDisplayTimer->stop();
+            emit connectionDurationUpdated("⏱️ --:--");
+
+            // Socket temizle
+            socket->deleteLater();
+            socket = nullptr;
+        }
+        break;
+
+    default:
+        qDebug() << "ℹ️ Socket durumu: " << state;
+        break;
+    }
+}
+// connectionscreen.cpp dosyasında bu fonksiyonları tanımlayın:
+
+void ConnectionScreen::updateConnectionLabel(const QString& text, const QString& color)
+{
+    ui->lblConnection->setText(text);
+    ui->lblConnection->setStyleSheet("color: " + color + "; font-weight: bold;");
+    qDebug() << "Label güncellendi: " << text;
+}
+
+void ConnectionScreen::appendToLog(const QString& message)
+{
+    ui->txtLog->append(message);
+    qDebug() << "Log'a eklendi: " << message;
+}

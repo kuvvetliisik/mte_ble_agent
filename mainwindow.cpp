@@ -51,8 +51,6 @@ void MainWindow::showFileTransfer() {
 
 void MainWindow::handleDeviceConnected(QString deviceName, QString macAddress, int rssi )
 {
-
-     //qDebug() << "✅ handleDeviceConnected() CALLED";
      qDebug() << "Device Name: " << deviceName;
      qDebug() << "MAC Address: " << macAddress;
      qDebug() << "RSSI: " << rssi;
@@ -77,7 +75,7 @@ void MainWindow::refreshConnectionFromDeviceInfo() {
             connectionScreen->connectToDevice();
         });
 
-        // ZORUNLU: eğer sinyal gelmezse fallback olarak 3 saniye sonra bağlanmayı dene
+        //Eğer sinyal gelmezse fallback olarak 3 saniye sonra bağlanmayı dene
         QTimer::singleShot(3000, this, [=]() {
             if (connectionScreen->socket == nullptr || !connectionScreen->socket->isOpen()) {
                 qDebug() << "⏱️ no disconnected signal, connecting as fallback...";
