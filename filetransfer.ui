@@ -29,35 +29,104 @@ QWidget::item {
 
 </string>
   </property>
-  <widget class="QStackedWidget" name="stackedWidget">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>40</y>
-     <width>1031</width>
-     <height>611</height>
-    </rect>
-   </property>
-   <property name="currentIndex">
-    <number>0</number>
-   </property>
-   <widget class="QWidget" name="page">
-    <widget class="QLabel" name="label">
-     <property name="geometry">
-      <rect>
-       <x>260</x>
-       <y>90</y>
-       <width>251</width>
-       <height>61</height>
-      </rect>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QStackedWidget" name="stackedWidget">
+     <property name="currentIndex">
+      <number>0</number>
      </property>
-     <property name="text">
-      <string>Test File Ekranı</string>
-     </property>
+     <widget class="QWidget" name="page">
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <widget class="QLabel" name="lblFileName">
+         <property name="styleSheet">
+          <string notr="true">
+QLabel {
+    color: #00FF00; 
+    font-weight: bold;
+}</string>
+         </property>
+         <property name="text">
+          <string>Seçilen Dosya :</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QPushButton" name="btnSelectFile">
+         <property name="styleSheet">
+          <string notr="true">QPushButton {
+    background-color: #5E81AC; /* Mavi Ton */
+    color: white;
+    border-radius: 5px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+
+QPushButton:pressed {
+    background-color: #4C566A; /* Koyu Gri */
+}
+</string>
+         </property>
+         <property name="text">
+          <string>Dosya Seç</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QPushButton" name="btnSendFile">
+         <property name="styleSheet">
+          <string notr="true">QPushButton {
+    background-color: #5E81AC; /* Mavi Ton */
+    color: white;
+    border-radius: 5px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+
+QPushButton:pressed {
+    background-color: #4C566A; /* Koyu Gri */
+}
+</string>
+         </property>
+         <property name="text">
+          <string>Gönder</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" colspan="3">
+        <widget class="QProgressBar" name="progressBar">
+         <property name="value">
+          <number>24</number>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="3">
+        <widget class="QPlainTextEdit" name="plainTextEdit">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">
+QPlainTextEdit {
+    background-color: black;
+    color: lightgreen;
+    border: 1px solid gray;
+    padding: 5px;
+}</string>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="page_2"/>
     </widget>
-   </widget>
-   <widget class="QWidget" name="page_2"/>
-  </widget>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>

@@ -2,6 +2,7 @@
 #define FILETRANSFER_H
 
 #include <QWidget>
+#include <QBluetoothSocket>
 
 namespace Ui {
 class FileTransfer;
@@ -13,9 +14,17 @@ class FileTransfer : public QWidget
 
 public:
     explicit FileTransfer(QWidget *parent = nullptr);
-    ~FileTransfer();
+    void setSocket(QBluetoothSocket* btSocket);
 
+    ~FileTransfer();
+private slots :
+    void on_btnSelectFile_clicked();
+    void on_btnSendFile_clicked();
 private:
+    QString selectedFilePath;
+    QBluetoothSocket* socket =nullptr;
+    QBluetoothSocket* btSocket;
+     void sendFile();
     Ui::FileTransfer *ui;
 };
 
