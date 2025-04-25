@@ -39,15 +39,18 @@ QWidget::item {
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="0" column="0">
         <widget class="QLabel" name="lblFileName">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
          <property name="styleSheet">
           <string notr="true">
 QLabel {
-    color: #00FF00; 
+    color: #5A4DA3 
     font-weight: bold;
 }</string>
          </property>
          <property name="text">
-          <string>Seçilen Dosya :</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt; color:#ffffff;&quot;&gt;Selected File :&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
        </item>
@@ -69,7 +72,7 @@ QPushButton:pressed {
 </string>
          </property>
          <property name="text">
-          <string>Dosya Seç</string>
+          <string>Select File</string>
          </property>
         </widget>
        </item>
@@ -91,18 +94,11 @@ QPushButton:pressed {
 </string>
          </property>
          <property name="text">
-          <string>Gönder</string>
+          <string>Send</string>
          </property>
         </widget>
        </item>
        <item row="1" column="0" colspan="3">
-        <widget class="QProgressBar" name="progressBar">
-         <property name="value">
-          <number>24</number>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0" colspan="3">
         <widget class="QPlainTextEdit" name="plainTextEdit">
          <property name="enabled">
           <bool>true</bool>
@@ -118,6 +114,28 @@ QPlainTextEdit {
          </property>
          <property name="readOnly">
           <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QPushButton" name="btnClearLog">
+         <property name="styleSheet">
+          <string notr="true">QPushButton {
+    background-color: #5E81AC; /* Mavi Ton */
+    color: white;
+    border-radius: 5px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+
+QPushButton:pressed {
+    background-color: #4C566A; /* Koyu Gri */
+}
+</string>
+         </property>
+         <property name="text">
+          <string>Clear</string>
          </property>
         </widget>
        </item>

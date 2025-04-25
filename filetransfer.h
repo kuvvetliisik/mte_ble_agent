@@ -24,7 +24,9 @@ private:
     QString selectedFilePath;
     QBluetoothSocket* socket =nullptr;
     QBluetoothSocket* btSocket;
-     void sendFile();
+    void clearLog_2();
+    void sendFile();
+
     Ui::FileTransfer *ui;
 };
 

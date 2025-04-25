@@ -8,87 +8,85 @@
 #include <QTimer>
 
 
-FileTransfer::FileTransfer(QWidget *parent)
+FileTransfer::FileTransfer(QWidget* parent)
     : QWidget(parent)
     , ui(new Ui::FileTransfer)
 {
     ui->setupUi(this);
+
+    connect(ui->btnSelectFile, &QPushButton::clicked,
+            this, &FileTransfer::on_btnSelectFile_clicked);
+    connect(ui->btnSendFile, &QPushButton::clicked,
+            this, &FileTransfer::on_btnSendFile_clicked);
+    connect(ui->btnClearLog, &QPushButton::clicked,
+            this, &FileTransfer::clearLog_2);
+
+    ui->plainTextEdit->appendPlainText("🔧 FileTransfer initialized.");
 }
 
-void FileTransfer::setSocket(QBluetoothSocket* btSocket) {
-    qDebug() << "📲 FileTransfer::setSocket çalıştı. Gelen socket: " << btSocket;
-    this->socket = btSocket;
-    qDebug() << "📡 Artık kullanılacak socket: " << this->socket;
-
+FileTransfer::~FileTransfer() {
+    delete ui;
 }
+
 void FileTransfer::on_btnSelectFile_clicked() {
-    QString filePath = QFileDialog::getOpenFileName(this, "Dosya Seç", QDir::homePath());
-
-    if (!filePath.isEmpty()) {
-        selectedFilePath = filePath;
-        ui->lblFileName->setText("Seçilen Dosya: " + QFileInfo(filePath).fileName());
-        ui->plainTextEdit->appendPlainText("📄 Dosya seçildi: " + filePath);
-    }
-
-}
-void FileTransfer::on_btnSendFile_clicked()
-{
-    if (!socket) {
-        ui->plainTextEdit->appendPlainText("❌ Bluetooth bağlantısı yok.");
-        return;
-    }
-
-    if (socket->state() == QBluetoothSocket::SocketState::ConnectedState) {
-        sendFile();
-        return;
-    }
-
-    ui->plainTextEdit->appendPlainText("⌛ Bağlantının tamamlanması bekleniyor...");
-
-    auto finalizeSend = [=]() {
-        if (socket && socket->state() == QBluetoothSocket::SocketState::ConnectedState) {
-            ui->plainTextEdit->appendPlainText("✅ Bağlantı hazır, dosya gönderiliyor...");
-            sendFile();
-        } else {
-            ui->plainTextEdit->appendPlainText("❌ Bağlantı hala hazır değil, gönderim iptal.");
-        }
-    };
-
-    static bool alreadyConnected = false;
-    if (!alreadyConnected) {
-        connect(socket, &QBluetoothSocket::connected, this, finalizeSend);
-        alreadyConnected = true;
-    }
+    QString path = QFileDialog::getOpenFileName(this, "Dosya Seç", QDir::homePath());
+    if (path.isEmpty()) return;
+    selectedFilePath = path;
+    ui->lblFileName->setText(QFileInfo(path).fileName());
+    ui->plainTextEdit->appendPlainText("📄 Dosya seçildi: " + path);
 }
 
-
-void FileTransfer::sendFile()
-{
-    if (!socket || socket->state() != QBluetoothSocket::SocketState::ConnectedState) {
-        ui->plainTextEdit->appendPlainText("❌ Bluetooth bağlı değil, gönderim iptal.");
-        return;
-    }
-
+void FileTransfer::on_btnSendFile_clicked() {
     if (selectedFilePath.isEmpty()) {
-        ui->plainTextEdit->appendPlainText("⚠️ Lütfen önce bir dosya seçin.");
+        ui->plainTextEdit->appendPlainText("⚠️ Lütfen önce dosya seçin!");
         return;
     }
 
+    ui->plainTextEdit->appendPlainText("🚀 Gönderim başlatılıyor...");
+    if (!socket) {
+        ui->plainTextEdit->appendPlainText("❌ Bluetooth soketi yok.");
+        return;
+    }
+    if (socket->state() != QBluetoothSocket::SocketState::ConnectedState) {
+        ui->plainTextEdit->appendPlainText("⌛ Bağlantı bekleniyor...");
+        connect(socket, &QBluetoothSocket::connected,
+                this, &FileTransfer::sendFile, Qt::UniqueConnection);
+        return;
+    }
+    qDebug() << "qDebug çağrıldı";
+        sendFile();
+}
+
+void FileTransfer::sendFile() {
+
+    ui->plainTextEdit->appendPlainText("📤 Gönderiliyor: " + QFileInfo(selectedFilePath).fileName());
     QFile file(selectedFilePath);
     if (!file.open(QIODevice::ReadOnly)) {
         ui->plainTextEdit->appendPlainText("❌ Dosya açılamadı.");
         return;
     }
-
-    QByteArray fileData = file.readAll();
+    QByteArray data = file.readAll();
     file.close();
 
-    socket->write(fileData);
-    ui->plainTextEdit->appendPlainText("📤 Dosya gönderildi: " + QFileInfo(selectedFilePath).fileName());
-    ui->progressBar->setValue(100);
+    socket->write(data);
+    if (!socket->waitForBytesWritten(5000)) {
+        ui->plainTextEdit->appendPlainText("⚠️ Zaman aşımı: " + socket->errorString());
+        return;
+    }
+    ui->plainTextEdit->appendPlainText("✅ Dosya başarıyla gönderildi.");
 }
 
-FileTransfer::~FileTransfer()
-{
-    delete ui;
+void FileTransfer::clearLog_2() {
+    ui->plainTextEdit->clear();
 }
+
+void FileTransfer::setSocket(QBluetoothSocket* btSocket) {
+    if (socket && socket != btSocket) {
+        socket->disconnect(this); // Eski bağlantıları kopart
+    }
+    socket = btSocket;
+    if (socket)
+        ui->plainTextEdit->appendPlainText("🔌 Yeni soket atandı.");
+}
+
+
