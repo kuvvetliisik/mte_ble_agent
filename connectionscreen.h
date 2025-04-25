@@ -11,7 +11,8 @@
 #include <functional>
 #include <QElapsedTimer>
 #include "logmanager.h"
-#include "QBluetoothServer"
+#include <QBluetoothServer>
+#include <QBluetoothServiceInfo>
 
 
 QT_BEGIN_NAMESPACE
@@ -30,13 +31,10 @@ public:
     void connectToDevice();
     void disconnectDevice();
     void setConnectionLabelText(const QString& text, const QString& color = "orange");
-    void clientConnected();
-    void onRemoteDisconnected();
-    void onSocketStateChanged(QBluetoothSocket::SocketState state);
+    //void updateConnectionStatusLabel(bool connected);
 
-    static QString getBluetoothVersionFromHciconfig();
     QBluetoothSocket *socket;
-
+    QBluetoothSocket *clientSocket ;
     ~ConnectionScreen();
 
 signals:
@@ -44,7 +42,10 @@ signals:
     void deviceDisconnected();
     void dataReceivedFromDevice(const QString &message);
     void deviceNameReceived(const QString &deviceName);
+    //    void bluetoothDisconnected();
     void connectionDurationUpdated(const QString &duration);
+    void bluetoothConnected(QBluetoothSocket* socket);
+
 
 
 private slots:
@@ -52,10 +53,11 @@ private slots:
     void clearLog();
     double calculateDistance(int measuredPower, int rssi, double N = 2.0);
     double guessNFromRSSI(int rssi);
-    //void handleDisconnection();
-public slots:
-    void updateConnectionLabel(const QString& text, const QString& color);
-    void appendToLog(const QString& message);
+    //void startRSSIMonitoring(const QString& macAddress);
+    //void refreshConnection();
+    //void handleIncomingConnection();
+    //void handleBluetoothConnected(QBluetoothSocket* socket);
+
 
 private:
     Ui::ConnectionScreen *ui;
@@ -67,14 +69,17 @@ private:
     //QTimer* rssiMonitorTimer;
     bool isDisconnectedByUser;
     bool prepareForConnection(QString &macAddress, QString &deviceName);
+    //QTimer *rssiMonitorTimer = nullptr;
+    //QProcess *rssiProcess = nullptr;
     QElapsedTimer connectionTimer;
     QTimer *connectionDisplayTimer;
     LogManager *logger;
-    QBluetoothServiceInfo serviceInfo;
     QBluetoothServer *rfcommServer;
-    bool disconnectInitiatedByUs = false;
+    //FileTransfer* fileTransfer = nullptr;
 
 
 };
 
 #endif
+
+

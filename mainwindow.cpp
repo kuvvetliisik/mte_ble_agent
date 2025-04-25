@@ -25,6 +25,10 @@ MainWindow::MainWindow(QWidget *parent)
     qDebug() << (success ? "✅ Signal-Slot bağlantısı başarılı!" : "❌ Signal-Slot bağlantısı başarısız!");
     connect(connectionScreen, &ConnectionScreen::connectionDurationUpdated,
             deviceInfo, &DeviceInfo::updateLiveConnectionDuration);
+    connect(connectionScreen, &ConnectionScreen::bluetoothConnected,
+            this, &MainWindow::handleBluetoothConnected);
+    connect(connectionScreen, &ConnectionScreen::bluetoothConnected, fileTransfer, &FileTransfer::setSocket);
+
 
 }
 
@@ -59,6 +63,15 @@ void MainWindow::handleDeviceConnected(QString deviceName, QString macAddress, i
    // showDeviceInfo();
 }
 
+void MainWindow::handleBluetoothConnected(QBluetoothSocket* socket) {
+    qDebug() << "🚀 MainWindow::handleBluetoothConnected çağrıldı!";
+    fileTransfer->setSocket(socket);
+
+    qDebug() << "📦 Socket gönderildi: " << socket;
+
+    ui->stackedWidget->setCurrentWidget(fileTransfer);
+}
+
 void MainWindow::refreshConnectionFromDeviceInfo() {
     qDebug() << "🔄 Refresh button clicked from DeviceInfo screen.";
 
@@ -67,15 +80,13 @@ void MainWindow::refreshConnectionFromDeviceInfo() {
     if (socket && socket->isOpen()) {
         qDebug() << "🔌 Socket is open. Disconnecting first...";
 
-        // Disconnected sinyali geldiğinde tekrar bağlan
         QMetaObject::Connection handler;
         handler = connect(socket, &QBluetoothSocket::disconnected, this, [=]() {
             qDebug() << "✅ disconnected signal, reconnecting...";
-            QObject::disconnect(handler); // bir kez çalışsın
+            QObject::disconnect(handler);
             connectionScreen->connectToDevice();
         });
 
-        //Eğer sinyal gelmezse fallback olarak 3 saniye sonra bağlanmayı dene
         QTimer::singleShot(3000, this, [=]() {
             if (connectionScreen->socket == nullptr || !connectionScreen->socket->isOpen()) {
                 qDebug() << "⏱️ no disconnected signal, connecting as fallback...";
@@ -92,7 +103,3 @@ void MainWindow::refreshConnectionFromDeviceInfo() {
         connectionScreen->connectToDevice();
     }
 }
-
-
-
-

@@ -28,6 +28,8 @@ private slots:
     void refreshConnectionFromDeviceInfo();
     //void setDeviceInfoConnectionStatus(bool connected);
     void showFileTransfer();
+    void handleBluetoothConnected(QBluetoothSocket* socket);
+
 
 private:
     Ui::MainWindow *ui;
